@@ -1276,6 +1276,8 @@ var _pinBuf     = '';
 var _pinLocked  = true;
 
 function _getPin() {
+  // Priority: C.pin (synced via Firebase) > localStorage > default
+  if (C && C.pin && C.pin.length === 4) return C.pin;
   var p = localStorage.getItem(PIN_KEY);
   return (p && p.length === 4) ? p : PIN_DEFAULT;
 }
@@ -1347,7 +1349,8 @@ function changePin() {
   if (n.length !== 4 || isNaN(Number(n))) { setMsg('var(--R)', 'Le PIN doit contenir 4 chiffres.'); return; }
   if (n !== c)          { setMsg('var(--R)', 'Les codes ne correspondent pas.'); return; }
   localStorage.setItem(PIN_KEY, n);
-  fbSave('PIN',{v:n});
+  C.pin = n;
+  persistC();
   document.getElementById('st_pin_new').value     = '';
   document.getElementById('st_pin_confirm').value = '';
   setMsg('var(--G)', '✓ PIN mis à jour avec succès.');
@@ -1357,7 +1360,8 @@ function changePin() {
 function removePin() {
   if (!confirm('Supprimer le PIN ? Le code par défaut 1234 sera rétabli.')) return;
   localStorage.removeItem(PIN_KEY);
-  fbSave('PIN',{v:'1234'});
+  C.pin = PIN_DEFAULT;
+  persistC();
   var msg = document.getElementById('pin_msg');
   if (msg) { msg.style.color = 'var(--G)'; msg.textContent = '✓ PIN supprimé. Code 1234 actif.'; }
   setTimeout(function() { if (msg) msg.textContent = ''; }, 3000);
@@ -1383,7 +1387,6 @@ renderAll();tick();setInterval(tick,1000);
 </script>
 
 <script>
-// Firebase save stub
 var _fbQueue={};
 function fbSave(key,data){
   if(window._fbSaveReal) window._fbSaveReal(key,data);
@@ -1409,7 +1412,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db  = getFirestore(app);
 let saveTimers = {};
 
 window._fbSaveReal = function(key, data) {
@@ -1420,13 +1423,13 @@ window._fbSaveReal = function(key, data) {
       await setDoc(doc(db, 'vieequilibree', key), { json: JSON.stringify(data) });
       syncDot('ok');
     } catch(e) { syncDot('err'); console.error(e); }
-  }, 700);
+  }, 600);
 };
 
-// Flush queued saves
+// Flush queued saves from before module loaded
 Object.keys(_fbQueue).forEach(k => window._fbSaveReal(k, _fbQueue[k]));
 
-// ── Listener: données journalières ──
+// ── AD (données journalières) ──
 onSnapshot(doc(db, 'vieequilibree', 'AD'), snap => {
   if (!snap.exists()) return;
   try {
@@ -1442,7 +1445,7 @@ onSnapshot(doc(db, 'vieequilibree', 'AD'), snap => {
   } catch(e) {}
 });
 
-// ── Listener: revenus ──
+// ── INC (revenus) ──
 onSnapshot(doc(db, 'vieequilibree', 'INC'), snap => {
   if (!snap.exists()) return;
   try {
@@ -1458,7 +1461,7 @@ onSnapshot(doc(db, 'vieequilibree', 'INC'), snap => {
   } catch(e) {}
 });
 
-// ── Listener: config ──
+// ── CFG (config + PIN inclus) ──
 onSnapshot(doc(db, 'vieequilibree', 'CFG'), snap => {
   if (!snap.exists()) return;
   try {
@@ -1467,13 +1470,17 @@ onSnapshot(doc(db, 'vieequilibree', 'CFG'), snap => {
     if (JSON.stringify(remote) !== JSON.stringify(local)) {
       localStorage.setItem('vf1c', JSON.stringify(remote));
       Object.assign(C, remote);
+      // Sync PIN to localStorage aussi pour _getPin()
+      if (remote.pin && remote.pin.length === 4) {
+        localStorage.setItem('vf1pin', remote.pin);
+      }
       if (typeof renderAll === 'function') renderAll();
       syncDot('ok');
     }
   } catch(e) {}
 });
 
-// ── Listener: thème ──
+// ── THEME ──
 onSnapshot(doc(db, 'vieequilibree', 'THEME'), snap => {
   if (!snap.exists()) return;
   try {
@@ -1482,20 +1489,6 @@ onSnapshot(doc(db, 'vieequilibree', 'THEME'), snap => {
       localStorage.setItem('vf1t', th);
       document.documentElement.setAttribute('data-theme', th);
       if (typeof updTC === 'function') updTC();
-      syncDot('ok');
-    }
-  } catch(e) {}
-});
-
-// ── Listener: PIN ── (nouveau !)
-onSnapshot(doc(db, 'vieequilibree', 'PIN'), snap => {
-  if (!snap.exists()) return;
-  try {
-    const remotePin = JSON.parse(snap.data().json || '{}').v;
-    const localPin  = localStorage.getItem('vf1pin') || '1234';
-    if (remotePin && remotePin !== localPin) {
-      localStorage.setItem('vf1pin', remotePin);
-      // Pas besoin de re-render, le PIN est lu au moment de la validation
       syncDot('ok');
     }
   } catch(e) {}
