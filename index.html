@@ -1347,6 +1347,7 @@ function changePin() {
   if (n.length !== 4 || isNaN(Number(n))) { setMsg('var(--R)', 'Le PIN doit contenir 4 chiffres.'); return; }
   if (n !== c)          { setMsg('var(--R)', 'Les codes ne correspondent pas.'); return; }
   localStorage.setItem(PIN_KEY, n);
+  fbSave('PIN',{v:n});
   document.getElementById('st_pin_new').value     = '';
   document.getElementById('st_pin_confirm').value = '';
   setMsg('var(--G)', '✓ PIN mis à jour avec succès.');
@@ -1356,6 +1357,7 @@ function changePin() {
 function removePin() {
   if (!confirm('Supprimer le PIN ? Le code par défaut 1234 sera rétabli.')) return;
   localStorage.removeItem(PIN_KEY);
+  fbSave('PIN',{v:'1234'});
   var msg = document.getElementById('pin_msg');
   if (msg) { msg.style.color = 'var(--G)'; msg.textContent = '✓ PIN supprimé. Code 1234 actif.'; }
   setTimeout(function() { if (msg) msg.textContent = ''; }, 3000);
@@ -1424,12 +1426,12 @@ window._fbSaveReal = function(key, data) {
 // Flush queued saves
 Object.keys(_fbQueue).forEach(k => window._fbSaveReal(k, _fbQueue[k]));
 
-// Realtime listeners
+// ── Listener: données journalières ──
 onSnapshot(doc(db, 'vieequilibree', 'AD'), snap => {
   if (!snap.exists()) return;
   try {
     const remote = JSON.parse(snap.data().json || '{}');
-    const local = JSON.parse(localStorage.getItem('vf1d') || '{}');
+    const local  = JSON.parse(localStorage.getItem('vf1d') || '{}');
     if (JSON.stringify(remote) !== JSON.stringify(local)) {
       localStorage.setItem('vf1d', JSON.stringify(remote));
       Object.assign(AD, remote);
@@ -1440,11 +1442,12 @@ onSnapshot(doc(db, 'vieequilibree', 'AD'), snap => {
   } catch(e) {}
 });
 
+// ── Listener: revenus ──
 onSnapshot(doc(db, 'vieequilibree', 'INC'), snap => {
   if (!snap.exists()) return;
   try {
     const remote = JSON.parse(snap.data().json || '{}');
-    const local = JSON.parse(localStorage.getItem('vf1i') || '{}');
+    const local  = JSON.parse(localStorage.getItem('vf1i') || '{}');
     if (JSON.stringify(remote) !== JSON.stringify(local)) {
       localStorage.setItem('vf1i', JSON.stringify(remote));
       Object.assign(INC, remote);
@@ -1455,11 +1458,12 @@ onSnapshot(doc(db, 'vieequilibree', 'INC'), snap => {
   } catch(e) {}
 });
 
+// ── Listener: config ──
 onSnapshot(doc(db, 'vieequilibree', 'CFG'), snap => {
   if (!snap.exists()) return;
   try {
     const remote = JSON.parse(snap.data().json || '{}');
-    const local = JSON.parse(localStorage.getItem('vf1c') || '{}');
+    const local  = JSON.parse(localStorage.getItem('vf1c') || '{}');
     if (JSON.stringify(remote) !== JSON.stringify(local)) {
       localStorage.setItem('vf1c', JSON.stringify(remote));
       Object.assign(C, remote);
@@ -1469,15 +1473,29 @@ onSnapshot(doc(db, 'vieequilibree', 'CFG'), snap => {
   } catch(e) {}
 });
 
+// ── Listener: thème ──
 onSnapshot(doc(db, 'vieequilibree', 'THEME'), snap => {
   if (!snap.exists()) return;
   try {
-    const data = snap.data();
-    const th = data.json ? JSON.parse(data.json).v : null;
+    const th = JSON.parse(snap.data().json || '{}').v;
     if (th && th !== localStorage.getItem('vf1t')) {
       localStorage.setItem('vf1t', th);
       document.documentElement.setAttribute('data-theme', th);
       if (typeof updTC === 'function') updTC();
+      syncDot('ok');
+    }
+  } catch(e) {}
+});
+
+// ── Listener: PIN ── (nouveau !)
+onSnapshot(doc(db, 'vieequilibree', 'PIN'), snap => {
+  if (!snap.exists()) return;
+  try {
+    const remotePin = JSON.parse(snap.data().json || '{}').v;
+    const localPin  = localStorage.getItem('vf1pin') || '1234';
+    if (remotePin && remotePin !== localPin) {
+      localStorage.setItem('vf1pin', remotePin);
+      // Pas besoin de re-render, le PIN est lu au moment de la validation
       syncDot('ok');
     }
   } catch(e) {}
