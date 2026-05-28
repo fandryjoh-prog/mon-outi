@@ -316,6 +316,33 @@ textarea.txtin{resize:vertical;min-height:52px;line-height:1.5}
   .wrap{display:none}
 }
 
+/* ═══ PIN LOCK SCREEN ═══════════════════════════════════════ */
+.pin-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg);transition:opacity .35s}
+.pin-overlay.hide{opacity:0;pointer-events:none}
+.pin-box{width:320px;max-width:92vw;background:var(--card);border-radius:20px;padding:32px 28px 28px;border:1px solid var(--bdr);box-shadow:0 16px 60px rgba(0,0,0,.18);text-align:center;animation:pinIn .3s ease both}
+@keyframes pinIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+.pin-logo{font-family:var(--ff-s);font-size:1.4rem;color:var(--text);margin-bottom:4px}
+.pin-logo em{color:var(--gold);font-style:normal}
+.pin-tagline{font-size:.65rem;color:var(--t2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:28px}
+.pin-dots{display:flex;justify-content:center;gap:14px;margin-bottom:24px}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--bdr);background:transparent;transition:.15s}
+.pin-dot.filled{background:var(--gold);border-color:var(--gold)}
+.pin-dot.error{background:var(--R);border-color:var(--R);animation:shake .3s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.pin-key{border:1.5px solid var(--bdr);background:var(--bg2);border-radius:12px;padding:0;height:54px;font-size:1.15rem;font-weight:700;color:var(--text);cursor:pointer;font-family:var(--ff);transition:.12s;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
+.pin-key:active{background:var(--goldbg);border-color:var(--gold);transform:scale(.94)}
+.pin-key.zero{grid-column:2}
+.pin-key.del{border-color:transparent;background:transparent;font-size:1rem;color:var(--t2)}
+.pin-key.del:active{color:var(--R)}
+.pin-err{font-size:.72rem;color:var(--R);min-height:20px;margin-top:4px;font-weight:500}
+.pin-hint{font-size:.65rem;color:var(--t2);margin-top:12px}
+.pin-hint a{color:var(--gold);cursor:pointer;text-decoration:underline}
+/* Settings PIN section */
+.pin-change-row{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+.pin-change-row input{width:80px;border:1.5px solid var(--bdr);border-radius:8px;padding:8px 10px;font-size:1rem;font-family:var(--ff-m);text-align:center;letter-spacing:.25em;color:var(--text);background:var(--inp);-webkit-appearance:none}
+.pin-change-row input:focus{outline:none;border-color:var(--gold)}
+
 .sync-dot{width:8px;height:8px;border-radius:50%;background:#555;display:inline-block;margin-right:4px;transition:background .3s}
 .sync-dot.ok{background:#5D9970}
 .sync-dot.sync{background:#C5A880;animation:sp .8s infinite}
@@ -324,6 +351,36 @@ textarea.txtin{resize:vertical;min-height:52px;line-height:1.5}
 </style>
 </head>
 <body>
+
+<!-- PIN LOCK SCREEN -->
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-box">
+    <div class="pin-logo">Vie <em>Équilibrée</em></div>
+    <div class="pin-tagline">Accès sécurisé</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-grid">
+      <button class="pin-key" onclick="pinPress('1')">1</button>
+      <button class="pin-key" onclick="pinPress('2')">2</button>
+      <button class="pin-key" onclick="pinPress('3')">3</button>
+      <button class="pin-key" onclick="pinPress('4')">4</button>
+      <button class="pin-key" onclick="pinPress('5')">5</button>
+      <button class="pin-key" onclick="pinPress('6')">6</button>
+      <button class="pin-key" onclick="pinPress('7')">7</button>
+      <button class="pin-key" onclick="pinPress('8')">8</button>
+      <button class="pin-key" onclick="pinPress('9')">9</button>
+      <button class="pin-key zero" onclick="pinPress('0')">0</button>
+      <button class="pin-key del" onclick="pinDel()">⌫</button>
+    </div>
+    <div class="pin-err" id="pinErr"></div>
+    <div class="pin-hint">Première utilisation ? <a onclick="pinSetFirst()">Créer un PIN</a></div>
+  </div>
+</div>
+
 
 <!-- SETTINGS MODAL -->
 <div class="moverlay" id="settModal">
@@ -358,6 +415,16 @@ textarea.txtin{resize:vertical;min-height:52px;line-height:1.5}
     </div>
   </div>
   <div class="msec"><h3>✨ Habitudes <button class="btn btno btnxs" onclick="addHabR()" style="margin-left:6px">+ Ajouter</button></h3><div id="s_hab"></div></div>
+  <div class="msec"><h3>🔐 Code PIN</h3>
+    <p style="font-size:.72rem;color:var(--t2);margin-bottom:10px">Modifiez votre code PIN à 4 chiffres. Le nouveau PIN sera actif immédiatement.</p>
+    <div class="pin-change-row">
+      <input type="password" inputmode="numeric" maxlength="4" id="st_pin_new" placeholder="••••"/>
+      <input type="password" inputmode="numeric" maxlength="4" id="st_pin_confirm" placeholder="Confirmer"/>
+      <button class="btn btng btnxs" onclick="changePin()">Changer</button>
+      <button class="btn btno btnxs" onclick="removePin()">Supprimer</button>
+    </div>
+    <div id="pin_msg" style="font-size:.7rem;min-height:18px;margin-top:6px"></div>
+  </div>
   <div style="display:flex;gap:8px">
     <button class="btn btng btnfull" onclick="saveS()">✓ Enregistrer tout</button>
     <button class="btn btno btnxs" onclick="resetAll()" style="padding:8px 11px">🗑</button>
@@ -744,6 +811,11 @@ function renderJour(target){
   h+='<div class="kpi kp"><div class="kv '+(spent>dayB?'bad':'gld')+'" id="kpi-spent">'+fmt(spent)+'</div><div class="kk">Dépensé Ar</div></div>';
   h+='</div>';
 
+
+  // Budget slot — filled by buildBudgetCard(), never re-rendered by renderJour
+  h+='<div id="budget-slot"></div>';
+
+
   // Habitudes + ring
   h+='<div class="card l-g">';
   h+='<div class="ctop"><div class="ctitle"><span class="ci ci-G">✨</span>Habitudes</div><span style="font-size:.68rem;color:var(--t2)">'+done+'/'+total+'</span></div>';
@@ -755,6 +827,7 @@ function renderJour(target){
     h+='<div class="hrow"><div class="hck '+(d.habits[hb.id]?'on':'')+'" onclick="togH(\''+k+'\',\''+hb.id+'\')">'+(d.habits[hb.id]?'✓':'')+'</div><span class="hlbl">'+hb.name+'</span><span class="hnote">'+(hb.note||'')+'</span></div>';
   });
   h+='</div>';
+
 
   // Tasks
   var tasks=d.tasks||[];
@@ -773,12 +846,14 @@ function renderJour(target){
   h+='<button class="btn btnb btnxs" style="margin-top:7px;width:100%;justify-content:center" onclick="addTask(\''+k+'\')">+ Ajouter</button>';
   h+='</div>';
 
+
   // Sport
   if(hasSport){
     var sl={0:'🏋️ Salle',2:'🏀 Basket',4:'🏋️ Salle',6:'🏀 Basket'}[dw];
     h+='<div class="card l-G"><div class="ctop"><div class="ctitle"><span class="ci ci-G">💪</span>'+sl+' — Sport matin</div><span class="spbadge">Avant 10h ⚡</span></div>';
     h+='<textarea class="txtin" onblur="saveF(\''+k+'\',\'wnote\',this.value)" placeholder="Durée, séries, ressenti…">'+escHtml(d.wnote||'')+'</textarea></div>';
   }
+
 
   // Work
   h+='<div class="card l-g"><div class="ctop"><div class="ctitle"><span class="ci ci-d">💼</span>Planning boulot</div></div>';
@@ -795,8 +870,6 @@ function renderJour(target){
   });
   h+='</div>';
 
-  // Budget slot — filled by buildBudgetCard(), never re-rendered by renderJour
-  h+='<div id="budget-slot"></div>';
 
   // Notes
   h+='<div class="card l-B"><div class="ctop"><div class="ctitle"><span class="ci ci-s">📝</span>Notes du jour</div></div>';
@@ -1195,23 +1268,128 @@ function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.c
 // ═══ RESIZE ═══
 var rto;window.addEventListener('resize',function(){clearTimeout(rto);rto=setTimeout(renderAll,220)});
 
+
+// ═══ PIN SYSTEM ════════════════════════════════════════════
+var PIN_KEY     = 'vf1pin';
+var PIN_DEFAULT = '1234';
+var _pinBuf     = '';
+var _pinLocked  = true;
+
+function _getPin() {
+  var p = localStorage.getItem(PIN_KEY);
+  return (p && p.length === 4) ? p : PIN_DEFAULT;
+}
+
+function pinPress(d) {
+  if (_pinBuf.length >= 4) return;
+  _pinBuf += d;
+  _pinDots(false);
+  if (_pinBuf.length === 4) {
+    setTimeout(_pinValidate, 150);
+  }
+}
+
+function pinDel() {
+  _pinBuf = _pinBuf.slice(0, -1);
+  _pinDots(false);
+  var e = document.getElementById('pinErr');
+  if (e) e.textContent = '';
+}
+
+function _pinDots(isError) {
+  for (var i = 0; i < 4; i++) {
+    var dot = document.getElementById('pd' + i);
+    if (!dot) continue;
+    dot.className = 'pin-dot';
+    if (i < _pinBuf.length) {
+      dot.classList.add(isError ? 'error' : 'filled');
+    }
+  }
+}
+
+function _pinValidate() {
+  if (_pinBuf === _getPin()) {
+    _pinUnlock();
+  } else {
+    _pinDots(true);
+    var e = document.getElementById('pinErr');
+    if (e) e.textContent = 'Code incorrect. Réessayez.';
+    setTimeout(function() {
+      _pinBuf = '';
+      _pinDots(false);
+      var e2 = document.getElementById('pinErr');
+      if (e2) e2.textContent = '';
+    }, 900);
+  }
+}
+
+function _pinUnlock() {
+  var ov = document.getElementById('pinOverlay');
+  if (ov) {
+    ov.classList.add('hide');
+    setTimeout(function() { ov.style.display = 'none'; }, 380);
+  }
+  _pinLocked = false;
+}
+
+function pinSetFirst() {
+  _pinUnlock();
+  setTimeout(openS, 450);
+}
+
+function changePin() {
+  var n   = (document.getElementById('st_pin_new')     || {}).value || '';
+  var c   = (document.getElementById('st_pin_confirm') || {}).value || '';
+  var msg = document.getElementById('pin_msg');
+  n = n.trim(); c = c.trim();
+  function setMsg(color, txt) { if (msg) { msg.style.color = color; msg.textContent = txt; } }
+  if (!n || !c)         { setMsg('var(--R)', 'Remplissez les deux champs.'); return; }
+  if (n.length !== 4 || isNaN(Number(n))) { setMsg('var(--R)', 'Le PIN doit contenir 4 chiffres.'); return; }
+  if (n !== c)          { setMsg('var(--R)', 'Les codes ne correspondent pas.'); return; }
+  localStorage.setItem(PIN_KEY, n);
+  document.getElementById('st_pin_new').value     = '';
+  document.getElementById('st_pin_confirm').value = '';
+  setMsg('var(--G)', '✓ PIN mis à jour avec succès.');
+  setTimeout(function() { if (msg) msg.textContent = ''; }, 3000);
+}
+
+function removePin() {
+  if (!confirm('Supprimer le PIN ? Le code par défaut 1234 sera rétabli.')) return;
+  localStorage.removeItem(PIN_KEY);
+  var msg = document.getElementById('pin_msg');
+  if (msg) { msg.style.color = 'var(--G)'; msg.textContent = '✓ PIN supprimé. Code 1234 actif.'; }
+  setTimeout(function() { if (msg) msg.textContent = ''; }, 3000);
+}
+
+function initPinScreen() {
+  var ov = document.getElementById('pinOverlay');
+  if (ov) ov.style.display = 'flex';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (!_pinLocked) return;
+  if (e.key >= '0' && e.key <= '9') { pinPress(e.key); }
+  else if (e.key === 'Backspace')    { pinDel(); }
+});
+
+
 // ═══ INIT ═══
+initPinScreen();
 loadAll();
 var td=new Date();cy=td.getFullYear();cm=td.getMonth();cd=td.getDate();
 renderAll();tick();setInterval(tick,1000);
 </script>
 
 <script>
-// Firebase save stub (will be overridden by module)
+// Firebase save stub
 var _fbQueue={};
 function fbSave(key,data){
-  if(window._fbSaveReal){window._fbSaveReal(key,data);}
-  else{_fbQueue[key]=data;}
+  if(window._fbSaveReal) window._fbSaveReal(key,data);
+  else _fbQueue[key]=data;
 }
 function syncDot(s){
   var d=document.getElementById('syncDot');
-  if(!d)return;
-  d.className='sync-dot '+s;
+  if(d) d.className='sync-dot '+s;
 }
 </script>
 
@@ -1230,10 +1408,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
 let saveTimers = {};
 
-// Real Firebase saver with debounce
 window._fbSaveReal = function(key, data) {
   clearTimeout(saveTimers[key]);
   syncDot('sync');
@@ -1241,17 +1417,14 @@ window._fbSaveReal = function(key, data) {
     try {
       await setDoc(doc(db, 'vieequilibree', key), { json: JSON.stringify(data) });
       syncDot('ok');
-    } catch(e) {
-      syncDot('err');
-      console.error('Firebase error:', e);
-    }
+    } catch(e) { syncDot('err'); console.error(e); }
   }, 700);
 };
 
-// Flush any queued saves
+// Flush queued saves
 Object.keys(_fbQueue).forEach(k => window._fbSaveReal(k, _fbQueue[k]));
 
-// Real-time listeners — update local data when another device saves
+// Realtime listeners
 onSnapshot(doc(db, 'vieequilibree', 'AD'), snap => {
   if (!snap.exists()) return;
   try {
@@ -1259,7 +1432,6 @@ onSnapshot(doc(db, 'vieequilibree', 'AD'), snap => {
     const local = JSON.parse(localStorage.getItem('vf1d') || '{}');
     if (JSON.stringify(remote) !== JSON.stringify(local)) {
       localStorage.setItem('vf1d', JSON.stringify(remote));
-      // Merge into AD without breaking reference
       Object.assign(AD, remote);
       Object.keys(AD).forEach(k => { if (!(k in remote)) delete AD[k]; });
       if (typeof renderAll === 'function') renderAll();
@@ -1300,9 +1472,9 @@ onSnapshot(doc(db, 'vieequilibree', 'CFG'), snap => {
 onSnapshot(doc(db, 'vieequilibree', 'THEME'), snap => {
   if (!snap.exists()) return;
   try {
-    const th = snap.data().json ? JSON.parse(snap.data().json).v : null;
-    const localTh = localStorage.getItem('vf1t');
-    if (th && th !== localTh) {
+    const data = snap.data();
+    const th = data.json ? JSON.parse(data.json).v : null;
+    if (th && th !== localStorage.getItem('vf1t')) {
       localStorage.setItem('vf1t', th);
       document.documentElement.setAttribute('data-theme', th);
       if (typeof updTC === 'function') updTC();
