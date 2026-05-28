@@ -346,7 +346,6 @@ textarea.txtin{resize:vertical;min-height:52px;line-height:1.5}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:#555;display:inline-block;margin-right:4px;transition:background .3s}
 .sync-dot.ok{background:#5D9970}.sync-dot.sync{background:#C5A880;animation:sp .8s infinite}.sync-dot.err{background:#BE6050}
 @keyframes sp{0%,100%{opacity:1}50%{opacity:.2}}
-/* Loading overlay */
 .fb-loading{position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
 .fb-loading .fl-logo{font-family:var(--ff-s);font-size:1.4rem;color:var(--text)}.fb-loading .fl-logo em{color:var(--gold);font-style:normal}
 .fb-loading .fl-dots{display:flex;gap:6px}
@@ -1289,7 +1288,6 @@ var _pinBuf     = '';
 var _pinLocked  = true;
 
 function _getPin() {
-  if (C && C.pin && String(C.pin).length === 4) return String(C.pin);
   var p = localStorage.getItem(PIN_KEY);
   return (p && p.length === 4) ? p : PIN_DEFAULT;
 }
@@ -1390,29 +1388,47 @@ document.addEventListener('keydown', function(e) {
 
 
 // ═══ INIT ═══
-// initPinScreen() is now called by Firebase after PIN is fetched
 loadAll();
 var td=new Date();cy=td.getFullYear();cm=td.getMonth();cd=td.getDate();
 renderAll();tick();setInterval(tick,1000);
-// Fallback: if Firebase takes too long (>3s), show PIN screen anyway
+
+// ── Expose setters so Firebase module (ES module scope) can update let vars ──
+window._appSetAD = function(remote) {
+  Object.keys(AD).forEach(function(k){ if(!(k in remote)) delete AD[k]; });
+  Object.assign(AD, remote);
+};
+window._appSetINC = function(remote) {
+  Object.keys(INC).forEach(function(k){ if(!(k in remote)) delete INC[k]; });
+  Object.assign(INC, remote);
+};
+window._appSetC = function(remote) {
+  Object.assign(C, remote);
+  // Sync PIN to localStorage
+  if(remote.pin && String(remote.pin).length === 4){
+    localStorage.setItem('vf1pin', String(remote.pin));
+  }
+};
+
+// Fallback: if Firebase takes >4s, show PIN screen with local data
 setTimeout(function(){
   var fl=document.getElementById('fbLoading');
-  if(fl&&fl.style.display!=='none'){
+  if(fl && fl.style.display !== 'none'){
     fl.style.display='none';
     initPinScreen();
   }
-},3000);
+}, 4000);
 </script>
 
 <script>
-var _fbQueue={};
-function fbSave(key,data){
-  if(window._fbSaveReal) window._fbSaveReal(key,data);
-  else _fbQueue[key]=data;
+// ── Firebase save stub (called from main script before module loads) ──
+var _fbQueue = {};
+function fbSave(key, data) {
+  if (window._fbSaveReal) window._fbSaveReal(key, data);
+  else _fbQueue[key] = data;
 }
-function syncDot(s){
-  var d=document.getElementById('syncDot');
-  if(d) d.className='sync-dot '+s;
+function syncDot(s) {
+  var d = document.getElementById('syncDot');
+  if (d) d.className = 'sync-dot ' + s;
 }
 </script>
 
@@ -1433,6 +1449,7 @@ const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 let saveTimers = {};
 
+// Save to Firebase with debounce
 window._fbSaveReal = function(key, data) {
   clearTimeout(saveTimers[key]);
   syncDot('sync');
@@ -1444,29 +1461,31 @@ window._fbSaveReal = function(key, data) {
   }, 600);
 };
 
-// Flush queued saves
+// Flush saves queued before module loaded
 Object.keys(_fbQueue).forEach(k => window._fbSaveReal(k, _fbQueue[k]));
 
-// ═══ STARTUP: fetch PIN + CFG from Firebase BEFORE showing PIN screen ═══
+// ═══════════════════════════════════════════════════════════
+// STARTUP: fetch PIN from Firebase BEFORE showing PIN screen
+// This is the key fix — we use getDoc (one-time read)
+// ═══════════════════════════════════════════════════════════
 async function startApp() {
   try {
-    // Fetch CFG (contains PIN)
     const cfgSnap = await getDoc(doc(db, 'vieequilibree', 'CFG'));
     if (cfgSnap.exists()) {
       const remote = JSON.parse(cfgSnap.data().json || '{}');
-      // Update C with remote config including PIN
-      Object.assign(C, remote);
-      localStorage.setItem('vf1c', JSON.stringify(remote));
-      // Sync PIN to localStorage so _getPin() works
+      // Update PIN in localStorage — _getPin() reads from here
       if (remote.pin && String(remote.pin).length === 4) {
         localStorage.setItem('vf1pin', String(remote.pin));
       }
+      // Update all config via window setter (avoids ES module scope issue)
+      if (window._appSetC) window._appSetC(remote);
+      localStorage.setItem('vf1c', JSON.stringify(remote));
     }
   } catch(e) {
-    console.warn('Firebase fetch failed, using local PIN:', e);
+    console.warn('Firebase PIN fetch error:', e);
   }
 
-  // Now hide loading screen and show PIN screen
+  // Hide loading, show PIN screen with correct PIN
   var fl = document.getElementById('fbLoading');
   if (fl) fl.style.display = 'none';
   if (typeof initPinScreen === 'function') initPinScreen();
@@ -1475,7 +1494,7 @@ async function startApp() {
 
 startApp();
 
-// ── Realtime listeners for data changes from other devices ──
+// ─── Realtime: données journalières ───
 onSnapshot(doc(db, 'vieequilibree', 'AD'), snap => {
   if (!snap.exists()) return;
   try {
@@ -1483,14 +1502,14 @@ onSnapshot(doc(db, 'vieequilibree', 'AD'), snap => {
     const local  = JSON.parse(localStorage.getItem('vf1d') || '{}');
     if (JSON.stringify(remote) !== JSON.stringify(local)) {
       localStorage.setItem('vf1d', JSON.stringify(remote));
-      Object.assign(AD, remote);
-      Object.keys(AD).forEach(k => { if (!(k in remote)) delete AD[k]; });
+      if (window._appSetAD) window._appSetAD(remote);
       if (typeof renderAll === 'function') renderAll();
       syncDot('ok');
     }
   } catch(e) {}
 });
 
+// ─── Realtime: revenus ───
 onSnapshot(doc(db, 'vieequilibree', 'INC'), snap => {
   if (!snap.exists()) return;
   try {
@@ -1498,14 +1517,14 @@ onSnapshot(doc(db, 'vieequilibree', 'INC'), snap => {
     const local  = JSON.parse(localStorage.getItem('vf1i') || '{}');
     if (JSON.stringify(remote) !== JSON.stringify(local)) {
       localStorage.setItem('vf1i', JSON.stringify(remote));
-      Object.assign(INC, remote);
-      Object.keys(INC).forEach(k => { if (!(k in remote)) delete INC[k]; });
+      if (window._appSetINC) window._appSetINC(remote);
       if (typeof renderAll === 'function') renderAll();
       syncDot('ok');
     }
   } catch(e) {}
 });
 
+// ─── Realtime: config (PIN inclus) ───
 onSnapshot(doc(db, 'vieequilibree', 'CFG'), snap => {
   if (!snap.exists()) return;
   try {
@@ -1513,17 +1532,14 @@ onSnapshot(doc(db, 'vieequilibree', 'CFG'), snap => {
     const local  = JSON.parse(localStorage.getItem('vf1c') || '{}');
     if (JSON.stringify(remote) !== JSON.stringify(local)) {
       localStorage.setItem('vf1c', JSON.stringify(remote));
-      Object.assign(C, remote);
-      // Update PIN in localStorage when CFG changes
-      if (remote.pin && String(remote.pin).length === 4) {
-        localStorage.setItem('vf1pin', String(remote.pin));
-      }
+      if (window._appSetC) window._appSetC(remote); // updates C.pin + localStorage vf1pin
       if (typeof renderAll === 'function') renderAll();
       syncDot('ok');
     }
   } catch(e) {}
 });
 
+// ─── Realtime: thème ───
 onSnapshot(doc(db, 'vieequilibree', 'THEME'), snap => {
   if (!snap.exists()) return;
   try {
