@@ -554,7 +554,9 @@ function fmtS(n){return(n<0?'− ':'')+fmt(n)+' Ar'}
 function fmtA(n){return n===null?'—':fmt(n)+' Ar'}
 
 // ═══ COMPUTED ═══
-function totalInc(){return C.incRows.reduce((s,r)=>s+(parseInt(INC[r.id])||0),0)}
+function incKey(){return cy+'_'+cm;}
+function incMo(){return INC[incKey()]||{};}
+function totalInc(){return C.incRows.reduce((s,r)=>s+(parseInt(incMo()[r.id])||0),0)}
 function dimeAmt(){return Math.round(totalInc()/10)}
 function fixMoT(){return C.fixedRows.reduce((s,r)=>s+r.amt,0)}
 function careMoT(){return C.careRows.reduce((s,r)=>s+r.amt,0)}
@@ -1126,7 +1128,7 @@ function renderRevenus(target){
 
   h+='<div class="card l-G"><div class="ctop"><div class="ctitle"><span class="ci ci-G">💵</span>Saisir mes revenus — '+MN[cm]+'</div></div>';
   C.incRows.forEach(function(r){
-    h+='<div class="sr"><span>'+r.name+'</span><input type="number" class="incin" value="'+(INC[r.id]||'')+'" placeholder="0 Ar" onchange="sInc(\''+r.id+'\',this.value)"/></div>';
+    h+='<div class="sr"><span>'+r.name+'</span><input type="number" class="incin" value="'+(incMo()[r.id]||'')+'" placeholder="0 Ar" onchange="sInc(\''+r.id+'\',this.value)"/></div>';
   });
   h+='<div class="tbox tb-G"><span class="tbl">Total revenus</span><span class="tbv" style="color:var(--G)">'+fmt(inc)+' Ar</span></div></div>';
 
@@ -1222,7 +1224,7 @@ function addFree(k){initD(k).bfree.push({lbl:'',amt:0});persist(true);var dw2=do
 function rmFree(k,i){initD(k).bfree.splice(i,1);persist(true);var dw2=dow(cy,cm,cd);buildBudgetCard(k,dw2,cd)}
 function addW(k){var t=document.getElementById('wti_'+k),p2=document.getElementById('wpi_'+k);if(!t||(!t.value.trim()&&!p2.value.trim()))return;initD(k).wExtra.push({t:t.value.trim()||'—',p:p2.value.trim()||'—'});persist(true);renderJour()}
 function rmW(k,i){initD(k).wExtra.splice(i,1);persist(true);renderJour()}
-function sInc(id,v){INC[id]=parseInt(v)||0;persistI();if(window.innerWidth>=1100)renderRC()}
+function sInc(id,v){var k=incKey();if(!INC[k])INC[k]={};INC[k][id]=parseInt(v)||0;persistI();if(window.innerWidth>=1100)renderRC()}
 
 // ═══ SETTINGS ═══
 function openS(){
@@ -1288,6 +1290,7 @@ var _pinBuf     = '';
 var _pinLocked  = true;
 
 function _getPin() {
+  if (C && C.pin && String(C.pin).length === 4) return String(C.pin);
   var p = localStorage.getItem(PIN_KEY);
   return (p && p.length === 4) ? p : PIN_DEFAULT;
 }
@@ -1391,166 +1394,110 @@ document.addEventListener('keydown', function(e) {
 loadAll();
 var td=new Date();cy=td.getFullYear();cm=td.getMonth();cd=td.getDate();
 renderAll();tick();setInterval(tick,1000);
-
-// ── Expose setters so Firebase module (ES module scope) can update let vars ──
-window._appSetAD = function(remote) {
-  Object.keys(AD).forEach(function(k){ if(!(k in remote)) delete AD[k]; });
-  Object.assign(AD, remote);
-};
-window._appSetINC = function(remote) {
-  Object.keys(INC).forEach(function(k){ if(!(k in remote)) delete INC[k]; });
-  Object.assign(INC, remote);
-};
-window._appSetC = function(remote) {
-  Object.assign(C, remote);
-  // Sync PIN to localStorage
-  if(remote.pin && String(remote.pin).length === 4){
-    localStorage.setItem('vf1pin', String(remote.pin));
-  }
-};
-
-// Fallback: if Firebase takes >4s, show PIN screen with local data
-setTimeout(function(){
-  var fl=document.getElementById('fbLoading');
-  if(fl && fl.style.display !== 'none'){
-    fl.style.display='none';
-    initPinScreen();
-  }
-}, 4000);
+// Expose setters for Firebase module
+window._appSetAD = function(remote){Object.keys(AD).forEach(function(k){if(!(k in remote))delete AD[k];});Object.assign(AD,remote);};
+window._appSetINC = function(remote){Object.keys(INC).forEach(function(k){if(!(k in remote))delete INC[k];});Object.assign(INC,remote);};
+window._appSetC = function(remote){Object.assign(C,remote);if(remote.pin&&String(remote.pin).length===4)localStorage.setItem('vf1pin',String(remote.pin));};
+// Fallback if Firebase slow
+setTimeout(function(){var fl=document.getElementById('fbLoading');if(fl&&fl.style.display!=='none'){fl.style.display='none';initPinScreen();}},4000);
 </script>
 
 <script>
-// ── Firebase save stub (called from main script before module loads) ──
-var _fbQueue = {};
-function fbSave(key, data) {
-  if (window._fbSaveReal) window._fbSaveReal(key, data);
-  else _fbQueue[key] = data;
-}
-function syncDot(s) {
-  var d = document.getElementById('syncDot');
-  if (d) d.className = 'sync-dot ' + s;
-}
+var _fbQueue={};
+function fbSave(key,data){if(window._fbSaveReal)window._fbSaveReal(key,data);else _fbQueue[key]=data;}
+function syncDot(s){var d=document.getElementById('syncDot');if(d)d.className='sync-dot '+s;}
 </script>
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAdfIiIMRevlNcyNhueJq2fzRdD53XBT1I",
-  authDomain: "mon-outil-budget.firebaseapp.com",
-  projectId: "mon-outil-budget",
-  storageBucket: "mon-outil-budget.firebasestorage.app",
-  messagingSenderId: "528991480334",
-  appId: "1:528991480334:web:2bf07bf807e2f9c148aa5f"
+const firebaseConfig={apiKey:"AIzaSyAdfIiIMRevlNcyNhueJq2fzRdD53XBT1I",authDomain:"mon-outil-budget.firebaseapp.com",projectId:"mon-outil-budget",storageBucket:"mon-outil-budget.firebasestorage.app",messagingSenderId:"528991480334",appId:"1:528991480334:web:2bf07bf807e2f9c148aa5f"};
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+let saveTimers={};
+window._fbSaveReal=function(key,data){
+  clearTimeout(saveTimers[key]);syncDot('sync');
+  saveTimers[key]=setTimeout(async()=>{
+    try{await setDoc(doc(db,'vieequilibree',key),{json:JSON.stringify(data)});syncDot('ok');}
+    catch(e){syncDot('err');console.error(e);}
+  },600);
 };
+Object.keys(_fbQueue).forEach(k=>window._fbSaveReal(k,_fbQueue[k]));
 
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
-let saveTimers = {};
-
-// Save to Firebase with debounce
-window._fbSaveReal = function(key, data) {
-  clearTimeout(saveTimers[key]);
-  syncDot('sync');
-  saveTimers[key] = setTimeout(async () => {
-    try {
-      await setDoc(doc(db, 'vieequilibree', key), { json: JSON.stringify(data) });
-      syncDot('ok');
-    } catch(e) { syncDot('err'); console.error(e); }
-  }, 600);
-};
-
-// Flush saves queued before module loaded
-Object.keys(_fbQueue).forEach(k => window._fbSaveReal(k, _fbQueue[k]));
-
-// ═══════════════════════════════════════════════════════════
-// STARTUP: fetch PIN from Firebase BEFORE showing PIN screen
-// This is the key fix — we use getDoc (one-time read)
-// ═══════════════════════════════════════════════════════════
-async function startApp() {
-  try {
-    const cfgSnap = await getDoc(doc(db, 'vieequilibree', 'CFG'));
-    if (cfgSnap.exists()) {
-      const remote = JSON.parse(cfgSnap.data().json || '{}');
-      // Update PIN in localStorage — _getPin() reads from here
-      if (remote.pin && String(remote.pin).length === 4) {
-        localStorage.setItem('vf1pin', String(remote.pin));
-      }
-      // Update all config via window setter (avoids ES module scope issue)
-      if (window._appSetC) window._appSetC(remote);
-      localStorage.setItem('vf1c', JSON.stringify(remote));
+// STARTUP: fetch PIN before showing PIN screen
+async function startApp(){
+  try{
+    const cfgSnap=await getDoc(doc(db,'vieequilibree','CFG'));
+    if(cfgSnap.exists()){
+      const remote=JSON.parse(cfgSnap.data().json||'{}');
+      if(remote.pin&&String(remote.pin).length===4)localStorage.setItem('vf1pin',String(remote.pin));
+      if(window._appSetC)window._appSetC(remote);
+      localStorage.setItem('vf1c',JSON.stringify(remote));
     }
-  } catch(e) {
-    console.warn('Firebase PIN fetch error:', e);
-  }
-
-  // Hide loading, show PIN screen with correct PIN
-  var fl = document.getElementById('fbLoading');
-  if (fl) fl.style.display = 'none';
-  if (typeof initPinScreen === 'function') initPinScreen();
+  }catch(e){console.warn('Firebase PIN fetch:',e);}
+  var fl=document.getElementById('fbLoading');
+  if(fl)fl.style.display='none';
+  if(typeof initPinScreen==='function')initPinScreen();
   syncDot('ok');
 }
-
 startApp();
 
-// ─── Realtime: données journalières ───
-onSnapshot(doc(db, 'vieequilibree', 'AD'), snap => {
-  if (!snap.exists()) return;
-  try {
-    const remote = JSON.parse(snap.data().json || '{}');
-    const local  = JSON.parse(localStorage.getItem('vf1d') || '{}');
-    if (JSON.stringify(remote) !== JSON.stringify(local)) {
-      localStorage.setItem('vf1d', JSON.stringify(remote));
-      if (window._appSetAD) window._appSetAD(remote);
-      if (typeof renderAll === 'function') renderAll();
+// Realtime: AD
+onSnapshot(doc(db,'vieequilibree','AD'),snap=>{
+  if(!snap.exists())return;
+  try{
+    const remote=JSON.parse(snap.data().json||'{}');
+    const local=JSON.parse(localStorage.getItem('vf1d')||'{}');
+    if(JSON.stringify(remote)!==JSON.stringify(local)){
+      localStorage.setItem('vf1d',JSON.stringify(remote));
+      if(window._appSetAD)window._appSetAD(remote);
+      if(typeof renderAll==='function')renderAll();
       syncDot('ok');
     }
-  } catch(e) {}
+  }catch(e){}
 });
 
-// ─── Realtime: revenus ───
-onSnapshot(doc(db, 'vieequilibree', 'INC'), snap => {
-  if (!snap.exists()) return;
-  try {
-    const remote = JSON.parse(snap.data().json || '{}');
-    const local  = JSON.parse(localStorage.getItem('vf1i') || '{}');
-    if (JSON.stringify(remote) !== JSON.stringify(local)) {
-      localStorage.setItem('vf1i', JSON.stringify(remote));
-      if (window._appSetINC) window._appSetINC(remote);
-      if (typeof renderAll === 'function') renderAll();
+// Realtime: INC (now monthly keyed)
+onSnapshot(doc(db,'vieequilibree','INC'),snap=>{
+  if(!snap.exists())return;
+  try{
+    const remote=JSON.parse(snap.data().json||'{}');
+    const local=JSON.parse(localStorage.getItem('vf1i')||'{}');
+    if(JSON.stringify(remote)!==JSON.stringify(local)){
+      localStorage.setItem('vf1i',JSON.stringify(remote));
+      if(window._appSetINC)window._appSetINC(remote);
+      if(typeof renderAll==='function')renderAll();
       syncDot('ok');
     }
-  } catch(e) {}
+  }catch(e){}
 });
 
-// ─── Realtime: config (PIN inclus) ───
-onSnapshot(doc(db, 'vieequilibree', 'CFG'), snap => {
-  if (!snap.exists()) return;
-  try {
-    const remote = JSON.parse(snap.data().json || '{}');
-    const local  = JSON.parse(localStorage.getItem('vf1c') || '{}');
-    if (JSON.stringify(remote) !== JSON.stringify(local)) {
-      localStorage.setItem('vf1c', JSON.stringify(remote));
-      if (window._appSetC) window._appSetC(remote); // updates C.pin + localStorage vf1pin
-      if (typeof renderAll === 'function') renderAll();
+// Realtime: CFG
+onSnapshot(doc(db,'vieequilibree','CFG'),snap=>{
+  if(!snap.exists())return;
+  try{
+    const remote=JSON.parse(snap.data().json||'{}');
+    const local=JSON.parse(localStorage.getItem('vf1c')||'{}');
+    if(JSON.stringify(remote)!==JSON.stringify(local)){
+      localStorage.setItem('vf1c',JSON.stringify(remote));
+      if(window._appSetC)window._appSetC(remote);
+      if(typeof renderAll==='function')renderAll();
       syncDot('ok');
     }
-  } catch(e) {}
+  }catch(e){}
 });
 
-// ─── Realtime: thème ───
-onSnapshot(doc(db, 'vieequilibree', 'THEME'), snap => {
-  if (!snap.exists()) return;
-  try {
-    const th = JSON.parse(snap.data().json || '{}').v;
-    if (th && th !== localStorage.getItem('vf1t')) {
-      localStorage.setItem('vf1t', th);
-      document.documentElement.setAttribute('data-theme', th);
-      if (typeof updTC === 'function') updTC();
+// Realtime: THEME
+onSnapshot(doc(db,'vieequilibree','THEME'),snap=>{
+  if(!snap.exists())return;
+  try{
+    const th=JSON.parse(snap.data().json||'{}').v;
+    if(th&&th!==localStorage.getItem('vf1t')){
+      localStorage.setItem('vf1t',th);
+      document.documentElement.setAttribute('data-theme',th);
+      if(typeof updTC==='function')updTC();
       syncDot('ok');
     }
-  } catch(e) {}
+  }catch(e){}
 });
 </script>
 
