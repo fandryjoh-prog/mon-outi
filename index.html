@@ -316,83 +316,93 @@ textarea.txtin{resize:vertical;min-height:52px;line-height:1.5}
   .wrap{display:none}
 }
 
-/* ═══ PIN LOCK SCREEN ═══════════════════════════════════════ */
-.pin-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg);transition:opacity .35s}
-.pin-overlay.hide{opacity:0;pointer-events:none}
-.pin-box{width:320px;max-width:92vw;background:var(--card);border-radius:20px;padding:32px 28px 28px;border:1px solid var(--bdr);box-shadow:0 16px 60px rgba(0,0,0,.18);text-align:center;animation:pinIn .3s ease both}
-@keyframes pinIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
-.pin-logo{font-family:var(--ff-s);font-size:1.4rem;color:var(--text);margin-bottom:4px}
-.pin-logo em{color:var(--gold);font-style:normal}
-.pin-tagline{font-size:.65rem;color:var(--t2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:28px}
-.pin-dots{display:flex;justify-content:center;gap:14px;margin-bottom:24px}
-.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--bdr);background:transparent;transition:.15s}
-.pin-dot.filled{background:var(--gold);border-color:var(--gold)}
-.pin-dot.error{background:var(--R);border-color:var(--R);animation:shake .3s ease}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
-.pin-key{border:1.5px solid var(--bdr);background:var(--bg2);border-radius:12px;padding:0;height:54px;font-size:1.15rem;font-weight:700;color:var(--text);cursor:pointer;font-family:var(--ff);transition:.12s;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
-.pin-key:active{background:var(--goldbg);border-color:var(--gold);transform:scale(.94)}
-.pin-key.zero{grid-column:2}
-.pin-key.del{border-color:transparent;background:transparent;font-size:1rem;color:var(--t2)}
-.pin-key.del:active{color:var(--R)}
-.pin-err{font-size:.72rem;color:var(--R);min-height:20px;margin-top:4px;font-weight:500}
-.pin-hint{font-size:.65rem;color:var(--t2);margin-top:12px}
-.pin-hint a{color:var(--gold);cursor:pointer;text-decoration:underline}
-/* Settings PIN section */
+
 .pin-change-row{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
 .pin-change-row input{width:80px;border:1.5px solid var(--bdr);border-radius:8px;padding:8px 10px;font-size:1rem;font-family:var(--ff-m);text-align:center;letter-spacing:.25em;color:var(--text);background:var(--inp);-webkit-appearance:none}
 .pin-change-row input:focus{outline:none;border-color:var(--gold)}
 
-.sync-dot{width:8px;height:8px;border-radius:50%;background:#555;display:inline-block;margin-right:4px;transition:background .3s}
+/* ═══ AUTH SCREEN ══════════════════════════════════════════ */
+.auth-overlay{position:fixed;inset:0;z-index:9000;background:var(--savbg);display:flex;align-items:center;justify-content:center;padding:16px}
+.auth-box{background:var(--card);border-radius:18px;padding:28px 22px;width:100%;max-width:380px;border:1.5px solid var(--gold);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.auth-logo{font-family:var(--ff-s);font-size:1.6rem;color:var(--text);text-align:center;margin-bottom:4px}
+.auth-logo em{color:var(--gold);font-style:normal}
+.auth-tagline{font-size:.65rem;color:var(--t2);text-align:center;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px}
+.auth-tabs{display:flex;gap:3px;background:rgba(197,168,128,.1);border-radius:9px;padding:3px;margin-bottom:18px}
+.auth-tab{flex:1;padding:7px 0;border:none;border-radius:7px;cursor:pointer;font-size:.72rem;font-weight:600;font-family:var(--ff);background:transparent;color:var(--sage);transition:.14s}
+.auth-tab.act{background:var(--ta);color:var(--tat)}
+.auth-field{margin-bottom:12px}
+.auth-field label{display:block;font-size:.63rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t2);margin-bottom:4px}
+.auth-field input{width:100%;border:1.5px solid var(--bdr);border-radius:9px;padding:10px 12px;font-size:.82rem;font-family:var(--ff);color:var(--text);background:var(--inp);-webkit-appearance:none;transition:.12s}
+.auth-field input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(197,168,128,.1)}
+.auth-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--gold);color:var(--tat);font-size:.85rem;font-family:var(--ff);font-weight:700;cursor:pointer;transition:.12s;margin-top:4px}
+.auth-btn:hover{filter:brightness(1.07)}.auth-btn:active{filter:brightness(.92)}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed}
+.auth-err{font-size:.72rem;color:var(--R);text-align:center;margin-top:8px;min-height:18px}
+.auth-ok{font-size:.72rem;color:var(--G);text-align:center;margin-top:8px}
+.auth-sep{text-align:center;font-size:.62rem;color:var(--t3);margin:12px 0}
+.auth-user-bar{background:var(--savbg);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--gold);font-size:.68rem;color:var(--sage)}
+.auth-user-bar em{color:var(--gold);font-style:normal}
+/* SYNC DOT */
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#555;display:inline-block;margin-right:4px;transition:background .3s;vertical-align:middle}
 .sync-dot.ok{background:#5D9970}.sync-dot.sync{background:#C5A880;animation:sp .8s infinite}.sync-dot.err{background:#BE6050}
 @keyframes sp{0%,100%{opacity:1}50%{opacity:.2}}
+/* LOADING */
 .fb-loading{position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
-.fb-loading .fl-logo{font-family:var(--ff-s);font-size:1.4rem;color:var(--text)}.fb-loading .fl-logo em{color:var(--gold);font-style:normal}
-.fb-loading .fl-dots{display:flex;gap:6px}
-.fl-d{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:fld .8s infinite}
+.fb-loading .fl-logo{font-family:var(--ff-s);font-size:1.6rem;color:var(--text)}.fb-loading .fl-logo em{color:var(--gold);font-style:normal}
+.fl-dots{display:flex;gap:6px}.fl-d{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:fld .8s infinite}
 .fl-d:nth-child(2){animation-delay:.15s}.fl-d:nth-child(3){animation-delay:.3s}
 @keyframes fld{0%,80%,100%{transform:scale(.5);opacity:.4}40%{transform:scale(1);opacity:1}}
 .fl-txt{font-size:.65rem;color:var(--t2);letter-spacing:.06em}
+/* DASHBOARD */
+.dash-score{background:var(--savbg);border-radius:14px;padding:14px;margin-bottom:11px}
+.dash-score h4{font-family:var(--ff-s);font-size:.88rem;color:var(--gold);margin-bottom:12px}
+.score-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.score-item{text-align:center;background:rgba(255,255,255,.04);border-radius:9px;padding:10px 6px}
+.score-circle{font-family:var(--ff-m);font-size:1.2rem;font-weight:700;color:var(--gold);line-height:1}
+.score-circle.ok{color:var(--G)}.score-circle.warn{color:var(--gold)}.score-circle.bad{color:var(--R)}
+.score-lbl{font-size:.52rem;color:var(--sage);margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
+.score-sub{font-size:.58rem;color:var(--t3);margin-top:2px}
+.alert-box{background:var(--Rbg);border-radius:10px;padding:10px 12px;margin-bottom:8px;border-left:3px solid var(--R);font-size:.74rem}
+.gcal-btn{background:var(--B);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:.72rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:var(--ff)}
+.annual-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:11px}
+@media(min-width:460px){.annual-grid{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
 <body>
 
-<!-- FIREBASE LOADING -->
+<!-- AUTH SCREEN -->
 <div class="fb-loading" id="fbLoading">
   <div class="fl-logo">Vie <em>Équilibrée</em></div>
   <div class="fl-dots"><div class="fl-d"></div><div class="fl-d"></div><div class="fl-d"></div></div>
-  <div class="fl-txt">Synchronisation…</div>
+  <div class="fl-txt">Chargement…</div>
 </div>
 
-<!-- PIN LOCK SCREEN -->
-<div class="pin-overlay" id="pinOverlay">
-  <div class="pin-box">
-    <div class="pin-logo">Vie <em>Équilibrée</em></div>
-    <div class="pin-tagline">Accès sécurisé</div>
-    <div class="pin-dots">
-      <div class="pin-dot" id="pd0"></div>
-      <div class="pin-dot" id="pd1"></div>
-      <div class="pin-dot" id="pd2"></div>
-      <div class="pin-dot" id="pd3"></div>
+<div class="auth-overlay" id="authOverlay" style="display:none">
+  <div class="auth-box">
+    <div class="auth-logo">Vie <em>Équilibrée</em></div>
+    <div class="auth-tagline">Gestion globale de vie</div>
+    <div class="auth-tabs">
+      <button class="auth-tab act" id="tab-login" onclick="showTab('login')">🔑 Connexion</button>
+      <button class="auth-tab" id="tab-register" onclick="showTab('register')">✨ Inscription</button>
     </div>
-    <div class="pin-grid">
-      <button class="pin-key" onclick="pinPress('1')">1</button>
-      <button class="pin-key" onclick="pinPress('2')">2</button>
-      <button class="pin-key" onclick="pinPress('3')">3</button>
-      <button class="pin-key" onclick="pinPress('4')">4</button>
-      <button class="pin-key" onclick="pinPress('5')">5</button>
-      <button class="pin-key" onclick="pinPress('6')">6</button>
-      <button class="pin-key" onclick="pinPress('7')">7</button>
-      <button class="pin-key" onclick="pinPress('8')">8</button>
-      <button class="pin-key" onclick="pinPress('9')">9</button>
-      <button class="pin-key zero" onclick="pinPress('0')">0</button>
-      <button class="pin-key del" onclick="pinDel()">⌫</button>
+    <!-- LOGIN -->
+    <div id="auth-login">
+      <div class="auth-field"><label>📧 Email</label><input type="email" id="login-email" placeholder="votre@email.com" autocomplete="email"/></div>
+      <div class="auth-field"><label>🔒 Mot de passe</label><input type="password" id="login-pwd" placeholder="••••••••" autocomplete="current-password"/></div>
+      <button class="auth-btn" id="login-btn" onclick="doLogin()">Se connecter</button>
+      <div class="auth-sep">ou</div>
+      <button class="auth-btn" style="background:var(--B)" onclick="doGoogle()">🌐 Continuer avec Google</button>
     </div>
-    <div class="pin-err" id="pinErr"></div>
-    <div class="pin-hint">Première utilisation ? <a onclick="pinSetFirst()">Créer un PIN</a></div>
+    <!-- REGISTER -->
+    <div id="auth-register" style="display:none">
+      <div class="auth-field"><label>👤 Nom</label><input type="text" id="reg-name" placeholder="Votre nom"/></div>
+      <div class="auth-field"><label>📧 Email</label><input type="email" id="reg-email" placeholder="votre@email.com" autocomplete="email"/></div>
+      <div class="auth-field"><label>🔒 Mot de passe</label><input type="password" id="reg-pwd" placeholder="Min. 6 caractères" autocomplete="new-password"/></div>
+      <button class="auth-btn" id="reg-btn" onclick="doRegister()">Créer mon compte</button>
+    </div>
+    <div class="auth-err" id="auth-err"></div>
   </div>
 </div>
-
 
 <!-- SETTINGS MODAL -->
 <div class="moverlay" id="settModal">
@@ -427,16 +437,7 @@ textarea.txtin{resize:vertical;min-height:52px;line-height:1.5}
     </div>
   </div>
   <div class="msec"><h3>✨ Habitudes <button class="btn btno btnxs" onclick="addHabR()" style="margin-left:6px">+ Ajouter</button></h3><div id="s_hab"></div></div>
-  <div class="msec"><h3>🔐 Code PIN</h3>
-    <p style="font-size:.72rem;color:var(--t2);margin-bottom:10px">Modifiez votre code PIN à 4 chiffres. Le nouveau PIN sera actif immédiatement.</p>
-    <div class="pin-change-row">
-      <input type="password" inputmode="numeric" maxlength="4" id="st_pin_new" placeholder="••••"/>
-      <input type="password" inputmode="numeric" maxlength="4" id="st_pin_confirm" placeholder="Confirmer"/>
-      <button class="btn btng btnxs" onclick="changePin()">Changer</button>
-      <button class="btn btno btnxs" onclick="removePin()">Supprimer</button>
-    </div>
-    <div id="pin_msg" style="font-size:.7rem;min-height:18px;margin-top:6px"></div>
-  </div>
+  
   <div style="display:flex;gap:8px">
     <button class="btn btng btnfull" onclick="saveS()">✓ Enregistrer tout</button>
     <button class="btn btno btnxs" onclick="resetAll()" style="padding:8px 11px">🗑</button>
@@ -459,7 +460,7 @@ textarea.txtin{resize:vertical;min-height:52px;line-height:1.5}
     <div class="csep"></div>
     <div><div class="clk-t" id="clkT">--:--:--</div><div class="clk-d" id="clkD">—</div></div>
   </div>
-  <span class="sync-dot" id="syncDot" title="Synchronisation"></span><button class="ibtn" onclick="openS()">⚙️</button>
+  <span class="sync-dot" id="syncDot"></span><span id="user-email-short" style="font-size:.58rem;color:var(--sage);margin-right:6px"></span><button class="ibtn" onclick="doLogout()" title="Déconnexion">🚪</button><button class="ibtn" onclick="openS()">⚙️</button>
 </header>
 
 <!-- DESKTOP SPLIT -->
@@ -479,12 +480,14 @@ textarea.txtin{resize:vertical;min-height:52px;line-height:1.5}
 <!-- MOBILE -->
 <div class="wrap" id="appWrap">
   <nav class="bnav" id="bnav">
+    <button class="nb" onclick="goPage('dashboard',this)"><span class="ni">🏠</span>Dashboard</button>
     <button class="nb act" onclick="goPage('jour',this)"><span class="ni">📅</span>Jour</button>
     <button class="nb" onclick="goPage('hebdo',this)"><span class="ni">📆</span>Hebdo</button>
     <button class="nb" onclick="goPage('mensuel',this)"><span class="ni">🗓</span>Mensuel</button>
     <button class="nb" onclick="goPage('courses',this)"><span class="ni">🛒</span>Courses</button>
     <button class="nb" onclick="goPage('revenus',this)"><span class="ni">💵</span>Revenus</button>
   </nav>
+  <div class="page" id="pg-dashboard"></div>
   <div class="page act" id="pg-jour"></div>
   <div class="page" id="pg-hebdo"></div>
   <div class="page" id="pg-mensuel"></div>
@@ -1224,7 +1227,7 @@ function addFree(k){initD(k).bfree.push({lbl:'',amt:0});persist(true);var dw2=do
 function rmFree(k,i){initD(k).bfree.splice(i,1);persist(true);var dw2=dow(cy,cm,cd);buildBudgetCard(k,dw2,cd)}
 function addW(k){var t=document.getElementById('wti_'+k),p2=document.getElementById('wpi_'+k);if(!t||(!t.value.trim()&&!p2.value.trim()))return;initD(k).wExtra.push({t:t.value.trim()||'—',p:p2.value.trim()||'—'});persist(true);renderJour()}
 function rmW(k,i){initD(k).wExtra.splice(i,1);persist(true);renderJour()}
-function sInc(id,v){var k=incKey();if(!INC[k])INC[k]={};INC[k][id]=parseInt(v)||0;persistI();if(window.innerWidth>=1100)renderRC()}
+function sInc(id,v){var mk=incKey();if(!INC[mk])INC[mk]={};INC[mk][id]=parseInt(v)||0;persistI();if(window.innerWidth>=1100)renderRC()}
 
 // ═══ SETTINGS ═══
 function openS(){
@@ -1283,18 +1286,17 @@ function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.c
 var rto;window.addEventListener('resize',function(){clearTimeout(rto);rto=setTimeout(renderAll,220)});
 
 
-// ═══ PIN SYSTEM ════════════════════════════════════════════
-var PIN_KEY     = 'vf1pin';
-var PIN_DEFAULT = '1234';
-var _pinBuf     = '';
-var _pinLocked  = true;
-
-function _getPin() {
-  if (C && C.pin && String(C.pin).length === 4) return String(C.pin);
-  var p = localStorage.getItem(PIN_KEY);
-  return (p && p.length === 4) ? p : PIN_DEFAULT;
+// ═══ AUTH HELPERS (Firebase Auth handles actual auth) ═══
+var _pinLocked = true; // kept for compatibility
+function showTab(t){
+  document.getElementById('auth-login').style.display = t==='login'?'block':'none';
+  document.getElementById('auth-register').style.display = t==='register'?'block':'none';
+  document.getElementById('tab-login').classList.toggle('act', t==='login');
+  document.getElementById('tab-register').classList.toggle('act', t==='register');
+  document.getElementById('auth-err').textContent='';
 }
 
+function _getPin(){return '';}
 function pinPress(d) {
   if (_pinBuf.length >= 4) return;
   _pinBuf += d;
@@ -1362,7 +1364,6 @@ function changePin() {
   if (n.length !== 4 || isNaN(Number(n))) { setMsg('var(--R)', 'Le PIN doit contenir 4 chiffres.'); return; }
   if (n !== c)          { setMsg('var(--R)', 'Les codes ne correspondent pas.'); return; }
   localStorage.setItem(PIN_KEY, n);
-  C.pin = n; persistC();
   document.getElementById('st_pin_new').value     = '';
   document.getElementById('st_pin_confirm').value = '';
   setMsg('var(--G)', '✓ PIN mis à jour avec succès.');
@@ -1372,133 +1373,265 @@ function changePin() {
 function removePin() {
   if (!confirm('Supprimer le PIN ? Le code par défaut 1234 sera rétabli.')) return;
   localStorage.removeItem(PIN_KEY);
-  C.pin = PIN_DEFAULT; persistC();
   var msg = document.getElementById('pin_msg');
   if (msg) { msg.style.color = 'var(--G)'; msg.textContent = '✓ PIN supprimé. Code 1234 actif.'; }
   setTimeout(function() { if (msg) msg.textContent = ''; }, 3000);
 }
 
-function initPinScreen() {
-  var ov = document.getElementById('pinOverlay');
-  if (ov) ov.style.display = 'flex';
+function initPinScreen(){} // now handled by Firebase Auth
+
+function renderPage(name){
+  if(name==='dashboard')renderDashboard();
+  else if(name==='jour')renderJour();
+  else if(name==='hebdo')renderHebdo();
+  else if(name==='mensuel')renderMensuel();
+  else if(name==='courses')renderCourses();
+  else if(name==='revenus')renderRevenus();
 }
 
-document.addEventListener('keydown', function(e) {
-  if (!_pinLocked) return;
-  if (e.key >= '0' && e.key <= '9') { pinPress(e.key); }
-  else if (e.key === 'Backspace')    { pinDel(); }
-});
+// ═══ DASHBOARD ═══
+function renderDashboard(){
+  var el=document.getElementById('pg-dashboard');if(!el)return;
+  var inc=totalInc(),dime=dimeAmt(),mr=monthReal();
+  var spend=mr.spend,hdone=mr.hdone,htot=mr.htot,daysIn=mr.daysIn,tdone=mr.tdone,ttot=mr.ttot,dim=mr.dim;
+  var env=envelope();
+  var k=key(cy,cm,cd),dc=dayComp(k),d=initD(k);
+  var tDone=(d.tasks||[]).filter(function(t){return t.done}).length;
+  var tTot=(d.tasks||[]).length;
+  var spent=dayRealSpend(k);
+  var dayHabPct=dc.pct;
+  var dayTaskPct=tTot>0?Math.round((tDone/tTot)*100):0;
+  var dayBudOk=env!==null?(spent<=env?100:Math.max(0,Math.round((1-(spent-env)/env)*100))):100;
+  var dayScore=Math.round((dayHabPct+dayTaskPct+dayBudOk)/3);
+  var moHabPct=htot>0?Math.round((hdone/htot)*100):0;
+  var moTaskPct=ttot>0?Math.round((tdone/ttot)*100):0;
+  var budPct=inc>0?Math.min(100,Math.round(((inc-spend)/inc)*100)):0;
+  var moScore=Math.round((moHabPct+moTaskPct+budPct)/3);
+  var annScore=realHabRate()||0;
+  function sc(p){return p>=80?'ok':p>=50?'warn':'bad';}
+  var h='<div class="ph"><div class="ph-row"><div class="ph-title">🏠 <em>Dashboard</em></div><div class="ph-sub">'+MN[cm]+' '+cy+'</div></div></div>';
+  h+='<div class="dash-score"><h4>🎯 Scores d'accomplissement</h4><div class="score-grid">';
+  h+='<div class="score-item"><div class="score-circle '+sc(dayScore)+'">'+dayScore+'%</div><div class="score-lbl">Aujourd'hui</div><div class="score-sub">'+cd+' '+MN[cm].slice(0,3)+'</div></div>';
+  h+='<div class="score-item"><div class="score-circle '+sc(moScore)+'">'+moScore+'%</div><div class="score-lbl">Ce mois</div><div class="score-sub">'+MN[cm]+'</div></div>';
+  h+='<div class="score-item"><div class="score-circle '+sc(annScore)+'">'+annScore+'%</div><div class="score-lbl">Annuel</div><div class="score-sub">'+(cm+1)+' mois</div></div>';
+  h+='</div><div style="margin-top:12px">';
+  h+='<div class="pw"><div class="pm"><span>Habitudes aujourd'hui</span><span>'+dayHabPct+'%</span></div><div class="pt"><div class="pf pf-g" style="width:'+dayHabPct+'%"></div></div></div>';
+  h+='<div class="pw"><div class="pm"><span>Habitudes ce mois</span><span>'+moHabPct+'%</span></div><div class="pt"><div class="pf pf-G" style="width:'+moHabPct+'%"></div></div></div>';
+  h+='<div class="pw"><div class="pm"><span>Budget restant</span><span>'+budPct+'%</span></div><div class="pt"><div class="pf '+(budPct<20?'pf-R':'pf-B')+'" style="width:'+budPct+'%"></div></div></div>';
+  h+='<div class="pw"><div class="pm"><span>Tâches mois</span><span>'+moTaskPct+'%</span></div><div class="pt"><div class="pf pf-P" style="width:'+moTaskPct+'%"></div></div></div>';
+  h+='</div></div>';
+  var alerts=[];
+  if(env!==null&&spent>env)alerts.push('⚠️ Budget journalier dépassé de <strong>'+fmt(spent-env)+' Ar</strong>');
+  if(inc>0&&spend>inc*0.9)alerts.push('🔴 Dépenses mois > 90% du revenu');
+  if(dayHabPct<50&&cd>1)alerts.push('📉 Habitudes du jour < 50%');
+  if(alerts.length>0){h+='<div style="margin-bottom:11px">';alerts.forEach(function(a){h+='<div class="alert-box">'+a+'</div>';});h+='</div>';}
+  h+='<div class="krow k4">';
+  h+='<div class="kpi kg"><div class="kv ok">'+fmt(inc)+'</div><div class="kk">Revenus '+MN[cm].slice(0,3)+'</div></div>';
+  h+='<div class="kpi kr"><div class="kv '+(spend>inc?'bad':'')+'">'+fmt(spend)+'</div><div class="kk">Dépenses</div></div>';
+  h+='<div class="kpi '+(inc-spend>=0?'kg':'kr')+'"><div class="kv '+(inc-spend>=0?'ok':'bad')+'">'+fmt(Math.abs(inc-spend))+'</div><div class="kk">Solde</div></div>';
+  h+='<div class="kpi kp"><div class="kv gld">'+fmt(dime)+'</div><div class="kk">Dîme</div></div>';
+  h+='</div>';
+  h+='<div class="card l-g"><div class="ctop"><div class="ctitle"><span class="ci ci-G">📅</span>Aujourd'hui — '+cd+' '+MN[cm]+'</div></div>';
+  h+='<div class="sr"><span>Habitudes</span><span class="sv '+sc(dayHabPct)+'">'+dc.done+'/'+dc.total+' ('+dayHabPct+'%)</span></div>';
+  h+='<div class="sr"><span>Tâches</span><span class="sv">'+tDone+'/'+tTot+'</span></div>';
+  h+='<div class="sr"><span>Dépensé aujourd'hui</span><span class="sv '+(env!==null&&spent>env?'bad':'ok')+'">'+fmt(spent)+' Ar</span></div>';
+  if(env!==null)h+='<div class="sr"><span>Enveloppe journalière</span><span class="sv gld">'+fmt(env)+' Ar</span></div>';
+  h+='</div>';
+  // Google Calendar
+  h+='<div class="card l-B"><div class="ctop"><div class="ctitle"><span class="ci ci-B">📅</span>Google Calendar</div></div>';
+  var tasks2=(d.tasks||[]).filter(function(t){return !t.done;});
+  if(!tasks2.length){h+='<p style="font-size:.72rem;color:var(--t3)">Aucune tâche non terminée.</p>';}
+  else{tasks2.forEach(function(t){var title=encodeURIComponent(t.name);var ds=cy+p2(cm+1)+p2(cd);var gcUrl='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+title+'&dates='+ds+'T080000/'+ds+'T090000';h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="font-size:.76rem">'+escHtml(t.name)+'</span><a href="'+gcUrl+'" target="_blank" style="text-decoration:none"><button class="gcal-btn">📅 Ajouter</button></a></div>';});}
+  h+='<div style="margin-top:10px"><a href="https://calendar.google.com" target="_blank" style="text-decoration:none"><button class="gcal-btn" style="width:100%;justify-content:center">🗓 Ouvrir Google Calendar</button></a></div></div>';
+  // Annuel
+  h+='<div class="dash-score"><h4>📈 Vision annuelle '+cy+'</h4><div class="annual-grid">';
+  h+='<div class="sgi"><div class="sgv">'+(cm+1)+'/12</div><div class="sgk">Mois écoulés</div></div>';
+  h+='<div class="sgi"><div class="sgv">'+annScore+'%</div><div class="sgk">Score annuel</div></div>';
+  h+='<div class="sgi"><div class="sgv">'+fmt(inc*(cm+1))+'</div><div class="sgk">Revenus cumulés Ar</div></div>';
+  h+='<div class="sgi"><div class="sgv">'+fmt(C.savings*(cm+1))+'</div><div class="sgk">Épargne cible Ar</div></div>';
+  h+='</div></div>';
+  el.innerHTML=h;
+}
 
+// ═══ INIT (called by Firebase Auth after login) ═══
+function appStart(){
+  loadAll();
+  var td=new Date();cy=td.getFullYear();cm=td.getMonth();cd=td.getDate();
+  renderAll();tick();setInterval(tick,1000);
+}
 
-// ═══ INIT ═══
-loadAll();
-var td=new Date();cy=td.getFullYear();cm=td.getMonth();cd=td.getDate();
-renderAll();tick();setInterval(tick,1000);
-// Expose setters for Firebase module
-window._appSetAD = function(remote){Object.keys(AD).forEach(function(k){if(!(k in remote))delete AD[k];});Object.assign(AD,remote);};
-window._appSetINC = function(remote){Object.keys(INC).forEach(function(k){if(!(k in remote))delete INC[k];});Object.assign(INC,remote);};
-window._appSetC = function(remote){Object.assign(C,remote);if(remote.pin&&String(remote.pin).length===4)localStorage.setItem('vf1pin',String(remote.pin));};
-// Fallback if Firebase slow
-setTimeout(function(){var fl=document.getElementById('fbLoading');if(fl&&fl.style.display!=='none'){fl.style.display='none';initPinScreen();}},4000);
+// Window setters for Firebase module
+window._appSetAD=function(r){Object.keys(AD).forEach(function(k2){if(!(k2 in r))delete AD[k2];});Object.assign(AD,r);};
+window._appSetINC=function(r){Object.keys(INC).forEach(function(k2){if(!(k2 in r))delete INC[k2];});Object.assign(INC,r);};
+window._appSetC=function(r){Object.assign(C,r);};
 </script>
 
 <script>
 var _fbQueue={};
+var _fbUID=null;
 function fbSave(key,data){if(window._fbSaveReal)window._fbSaveReal(key,data);else _fbQueue[key]=data;}
 function syncDot(s){var d=document.getElementById('syncDot');if(d)d.className='sync-dot '+s;}
+function setAuthErr(msg){var e=document.getElementById('auth-err');if(e)e.textContent=msg;}
+function setBtnLoading(id,loading){var b=document.getElementById(id);if(b)b.disabled=loading;}
 </script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-const firebaseConfig={apiKey:"AIzaSyAdfIiIMRevlNcyNhueJq2fzRdD53XBT1I",authDomain:"mon-outil-budget.firebaseapp.com",projectId:"mon-outil-budget",storageBucket:"mon-outil-budget.firebasestorage.app",messagingSenderId:"528991480334",appId:"1:528991480334:web:2bf07bf807e2f9c148aa5f"};
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig={
+  apiKey:"AIzaSyAdfIiIMRevlNcyNhueJq2fzRdD53XBT1I",
+  authDomain:"mon-outil-budget.firebaseapp.com",
+  projectId:"mon-outil-budget",
+  storageBucket:"mon-outil-budget.firebasestorage.app",
+  messagingSenderId:"528991480334",
+  appId:"1:528991480334:web:2bf07bf807e2f9c148aa5f"
+};
+
 const app=initializeApp(firebaseConfig);
 const db=getFirestore(app);
+const auth=getAuth(app);
+const googleProvider=new GoogleAuthProvider();
 let saveTimers={};
+let unsubListeners=[];
+
+// ── Save to Firebase (per user) ──
 window._fbSaveReal=function(key,data){
-  clearTimeout(saveTimers[key]);syncDot('sync');
+  if(!_fbUID)return;
+  clearTimeout(saveTimers[key]);
+  syncDot('sync');
   saveTimers[key]=setTimeout(async()=>{
-    try{await setDoc(doc(db,'vieequilibree',key),{json:JSON.stringify(data)});syncDot('ok');}
-    catch(e){syncDot('err');console.error(e);}
-  },600);
+    try{
+      await setDoc(doc(db,'users',_fbUID,key,'data'),{json:JSON.stringify(data)});
+      syncDot('ok');
+    }catch(e){syncDot('err');console.error(e);}
+  },700);
 };
-Object.keys(_fbQueue).forEach(k=>window._fbSaveReal(k,_fbQueue[k]));
 
-// STARTUP: fetch PIN before showing PIN screen
-async function startApp(){
+// ── Load data from Firebase for this user ──
+async function loadUserData(uid){
   try{
-    const cfgSnap=await getDoc(doc(db,'vieequilibree','CFG'));
-    if(cfgSnap.exists()){
-      const remote=JSON.parse(cfgSnap.data().json||'{}');
-      if(remote.pin&&String(remote.pin).length===4)localStorage.setItem('vf1pin',String(remote.pin));
-      if(window._appSetC)window._appSetC(remote);
-      localStorage.setItem('vf1c',JSON.stringify(remote));
+    const keys=['AD','INC','CFG'];
+    for(const k of keys){
+      const snap=await getDoc(doc(db,'users',uid,k,'data'));
+      if(snap.exists()){
+        const data=JSON.parse(snap.data().json||'{}');
+        localStorage.setItem(k==='AD'?'vf1d':k==='INC'?'vf1i':'vf1c',JSON.stringify(data));
+        if(k==='AD'&&window._appSetAD)window._appSetAD(data);
+        if(k==='INC'&&window._appSetINC)window._appSetINC(data);
+        if(k==='CFG'&&window._appSetC)window._appSetC(data);
+      }
     }
-  }catch(e){console.warn('Firebase PIN fetch:',e);}
-  var fl=document.getElementById('fbLoading');
-  if(fl)fl.style.display='none';
-  if(typeof initPinScreen==='function')initPinScreen();
-  syncDot('ok');
+  }catch(e){console.warn('loadUserData:',e);}
 }
-startApp();
 
-// Realtime: AD
-onSnapshot(doc(db,'vieequilibree','AD'),snap=>{
-  if(!snap.exists())return;
-  try{
-    const remote=JSON.parse(snap.data().json||'{}');
-    const local=JSON.parse(localStorage.getItem('vf1d')||'{}');
-    if(JSON.stringify(remote)!==JSON.stringify(local)){
-      localStorage.setItem('vf1d',JSON.stringify(remote));
-      if(window._appSetAD)window._appSetAD(remote);
-      if(typeof renderAll==='function')renderAll();
-      syncDot('ok');
-    }
-  }catch(e){}
+// ── Setup realtime listeners for this user ──
+function setupListeners(uid){
+  // Unsubscribe previous
+  unsubListeners.forEach(u=>u());
+  unsubListeners=[];
+
+  const listen=(key,lsKey,setter)=>{
+    const unsub=onSnapshot(doc(db,'users',uid,key,'data'),snap=>{
+      if(!snap.exists())return;
+      try{
+        const remote=JSON.parse(snap.data().json||'{}');
+        const local=JSON.parse(localStorage.getItem(lsKey)||'{}');
+        if(JSON.stringify(remote)!==JSON.stringify(local)){
+          localStorage.setItem(lsKey,JSON.stringify(remote));
+          if(setter)setter(remote);
+          if(typeof renderAll==='function')renderAll();
+          syncDot('ok');
+        }
+      }catch(e){}
+    });
+    unsubListeners.push(unsub);
+  };
+
+  listen('AD','vf1d',window._appSetAD);
+  listen('INC','vf1i',window._appSetINC);
+  listen('CFG','vf1c',window._appSetC);
+}
+
+// ── Auth state changed ──
+onAuthStateChanged(auth, async(user)=>{
+  document.getElementById('fbLoading').style.display='none';
+  if(user){
+    // User logged in
+    _fbUID=user.uid;
+    document.getElementById('authOverlay').style.display='none';
+    // Show email in topbar
+    var short=user.displayName||user.email.split('@')[0];
+    var el=document.getElementById('user-email-short');
+    if(el)el.textContent=short;
+    // Load data then start app
+    await loadUserData(user.uid);
+    setupListeners(user.uid);
+    // Flush queued saves
+    Object.keys(_fbQueue).forEach(k=>window._fbSaveReal(k,_fbQueue[k]));
+    if(typeof appStart==='function')appStart();
+    syncDot('ok');
+  } else {
+    // Not logged in — show auth screen
+    _fbUID=null;
+    document.getElementById('authOverlay').style.display='flex';
+    syncDot('err');
+  }
 });
 
-// Realtime: INC (now monthly keyed)
-onSnapshot(doc(db,'vieequilibree','INC'),snap=>{
-  if(!snap.exists())return;
+// ── Login ──
+window.doLogin=async function(){
+  const email=(document.getElementById('login-email')||{}).value||'';
+  const pwd=(document.getElementById('login-pwd')||{}).value||'';
+  if(!email||!pwd){setAuthErr('Remplissez tous les champs.');return;}
+  setBtnLoading('login-btn',true);
+  setAuthErr('');
   try{
-    const remote=JSON.parse(snap.data().json||'{}');
-    const local=JSON.parse(localStorage.getItem('vf1i')||'{}');
-    if(JSON.stringify(remote)!==JSON.stringify(local)){
-      localStorage.setItem('vf1i',JSON.stringify(remote));
-      if(window._appSetINC)window._appSetINC(remote);
-      if(typeof renderAll==='function')renderAll();
-      syncDot('ok');
-    }
-  }catch(e){}
-});
+    await signInWithEmailAndPassword(auth,email,pwd);
+  }catch(e){
+    const msgs={'auth/user-not-found':'Compte introuvable.','auth/wrong-password':'Mot de passe incorrect.','auth/invalid-email':'Email invalide.','auth/too-many-requests':'Trop de tentatives. Réessayez plus tard.'};
+    setAuthErr(msgs[e.code]||'Erreur : '+e.message);
+  }
+  setBtnLoading('login-btn',false);
+};
 
-// Realtime: CFG
-onSnapshot(doc(db,'vieequilibree','CFG'),snap=>{
-  if(!snap.exists())return;
+// ── Register ──
+window.doRegister=async function(){
+  const name=(document.getElementById('reg-name')||{}).value.trim()||'';
+  const email=(document.getElementById('reg-email')||{}).value||'';
+  const pwd=(document.getElementById('reg-pwd')||{}).value||'';
+  if(!email||!pwd){setAuthErr('Remplissez tous les champs.');return;}
+  if(pwd.length<6){setAuthErr('Mot de passe : 6 caractères minimum.');return;}
+  setBtnLoading('reg-btn',true);
+  setAuthErr('');
   try{
-    const remote=JSON.parse(snap.data().json||'{}');
-    const local=JSON.parse(localStorage.getItem('vf1c')||'{}');
-    if(JSON.stringify(remote)!==JSON.stringify(local)){
-      localStorage.setItem('vf1c',JSON.stringify(remote));
-      if(window._appSetC)window._appSetC(remote);
-      if(typeof renderAll==='function')renderAll();
-      syncDot('ok');
-    }
-  }catch(e){}
-});
+    const cred=await createUserWithEmailAndPassword(auth,email,pwd);
+    if(name)await updateProfile(cred.user,{displayName:name});
+  }catch(e){
+    const msgs={'auth/email-already-in-use':'Email déjà utilisé.','auth/invalid-email':'Email invalide.','auth/weak-password':'Mot de passe trop faible.'};
+    setAuthErr(msgs[e.code]||'Erreur : '+e.message);
+  }
+  setBtnLoading('reg-btn',false);
+};
 
-// Realtime: THEME
-onSnapshot(doc(db,'vieequilibree','THEME'),snap=>{
-  if(!snap.exists())return;
+// ── Google login ──
+window.doGoogle=async function(){
+  setAuthErr('');
   try{
-    const th=JSON.parse(snap.data().json||'{}').v;
-    if(th&&th!==localStorage.getItem('vf1t')){
-      localStorage.setItem('vf1t',th);
-      document.documentElement.setAttribute('data-theme',th);
-      if(typeof updTC==='function')updTC();
-      syncDot('ok');
-    }
-  }catch(e){}
-});
+    await signInWithPopup(auth,googleProvider);
+  }catch(e){
+    if(e.code!=='auth/popup-closed-by-user')setAuthErr('Erreur Google : '+e.message);
+  }
+};
+
+// ── Logout ──
+window.doLogout=async function(){
+  if(!confirm('Se déconnecter ?'))return;
+  await signOut(auth);
+  localStorage.clear();
+  syncDot('err');
+};
 </script>
 
 </body>
