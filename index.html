@@ -1437,28 +1437,46 @@ async function loadUser(u){
   const nm=u.displayName||u.email.split('@')[0];
   const el=document.getElementById('uname');if(el)el.textContent=nm;
 
-  // ⚠️ CLEAR localStorage first so previous account data doesn't bleed through
-  localStorage.removeItem('vf1d');
-  localStorage.removeItem('vf1i');
-  localStorage.removeItem('vf1c');
-  localStorage.removeItem('vf1t');
+  // Track previous UID to detect account switch
+  const prevUID=localStorage.getItem('vf1uid')||'';
+  const isSwitch=prevUID && prevUID!==uid;
 
-  // Reset in-memory variables too
-  if(window._setAD)window._setAD({});
-  if(window._setINC)window._setINC({});
-  if(window._setC)window._setC({});
+  // If switching accounts → clear localStorage of previous user
+  if(isSwitch){
+    localStorage.removeItem('vf1d');
+    localStorage.removeItem('vf1i');
+    localStorage.removeItem('vf1c');
+    localStorage.removeItem('vf1t');
+    if(window._setAD)window._setAD({});
+    if(window._setINC)window._setINC({});
+    if(window._setC)window._setC({});
+  }
 
-  // Now load THIS user's data from Firebase
+  // Save current UID
+  localStorage.setItem('vf1uid', uid);
+
   const keys={AD:'vf1d',INC:'vf1i',CFG:'vf1c'};
   for(const[k,ls]of Object.entries(keys)){
     try{
-      const s=await getDoc(doc(db,'users',uid,k,'d'));
-      if(s.exists()){
-        const data=JSON.parse(s.data().j||'{}');
+      const snap=await getDoc(doc(db,'users',uid,k,'d'));
+      if(snap.exists()){
+        // Firebase has data → use it
+        const data=JSON.parse(snap.data().j||'{}');
         localStorage.setItem(ls,JSON.stringify(data));
         if(k==='AD'&&window._setAD)window._setAD(data);
         if(k==='INC'&&window._setINC)window._setINC(data);
         if(k==='CFG'&&window._setC)window._setC(data);
+      } else {
+        // Firebase empty → upload existing localStorage data (first time login)
+        const local=localStorage.getItem(ls);
+        if(local){
+          const data=JSON.parse(local);
+          await setDoc(doc(db,'users',uid,k,'d'),{j:JSON.stringify(data)});
+          if(k==='AD'&&window._setAD)window._setAD(data);
+          if(k==='INC'&&window._setINC)window._setINC(data);
+          if(k==='CFG'&&window._setC)window._setC(data);
+          console.log('Uploaded existing local data to Firebase:',k);
+        }
       }
     }catch(e){console.warn('load',k,e);}
   }
