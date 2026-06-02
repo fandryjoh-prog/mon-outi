@@ -1372,11 +1372,18 @@ function removePin() {
 
 // ═══ INIT — called by Firebase after login ═══
 function appStart(){
-  loadAll();
-  var td=new Date();cy=td.getFullYear();cm=td.getMonth();cd=td.getDate();
-  renderAll();
-  tick();
-  setInterval(tick,1000);
+  try{
+    loadAll();
+    var td=new Date();cy=td.getFullYear();cm=td.getMonth();cd=td.getDate();
+    // Show error on page if renderAll fails
+    try{renderAll();}catch(e){
+      document.querySelector('.page.act').innerHTML='<div style="padding:20px;color:red;font-size:.8rem"><strong>Erreur renderAll:</strong><br>'+e.message+'<br><pre>'+e.stack+'</pre></div>';
+    }
+    tick();
+    setInterval(tick,1000);
+  }catch(e){
+    document.body.innerHTML+='<div style="position:fixed;top:60px;left:0;right:0;padding:20px;background:#fee;color:red;z-index:9999;font-size:.78rem"><strong>Erreur appStart:</strong> '+e.message+'</div>';
+  }
 }
 
 // Expose setters for Firebase module to update let variables
