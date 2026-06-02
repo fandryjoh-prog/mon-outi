@@ -696,11 +696,14 @@ function swRt(name,btn){
   renderRC();
 }
 function renderPage(name){
-  if(name==='jour')renderJour();
-  else if(name==='hebdo')renderHebdo();
-  else if(name==='mensuel')renderMensuel();
-  else if(name==='courses')renderCourses();
-  else if(name==='revenus')renderRevenus();
+  try{
+    if(name==='dashboard')renderDashboard();
+    else if(name==='jour')renderJour();
+    else if(name==='hebdo')renderHebdo();
+    else if(name==='mensuel')renderMensuel();
+    else if(name==='courses')renderCourses();
+    else if(name==='revenus')renderRevenus();
+  }catch(e){console.error('renderPage error:',name,e);}
 }
 function renderAll(){
   // Render currently visible page
@@ -1420,15 +1423,6 @@ function removePin() {
 
 function initPinScreen(){} // now handled by Firebase Auth
 
-function renderPage(name){
-  if(name==='dashboard')renderDashboard();
-  else if(name==='jour')renderJour();
-  else if(name==='hebdo')renderHebdo();
-  else if(name==='mensuel')renderMensuel();
-  else if(name==='courses')renderCourses();
-  else if(name==='revenus')renderRevenus();
-}
-
 // ═══ DASHBOARD ═══
 function renderDashboard(){
   var el=document.getElementById('pg-dashboard');if(!el)return;
@@ -1497,7 +1491,14 @@ function renderDashboard(){
 function appStart(){
   loadAll();
   var td=new Date();cy=td.getFullYear();cm=td.getMonth();cd=td.getDate();
-  renderAll();tick();setInterval(tick,1000);
+  // Make sure jour page is active by default
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('act');});
+  var jour=document.getElementById('pg-jour');
+  if(jour)jour.classList.add('act');
+  document.querySelectorAll('.nb').forEach(function(b,i){b.classList.toggle('act',i===1);});
+  try{renderAll();}catch(e){console.error('renderAll error:',e);}
+  tick();
+  setInterval(tick,1000);
 }
 
 // Window setters for Firebase module
