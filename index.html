@@ -316,130 +316,76 @@ textarea.txtin{resize:vertical;min-height:52px;line-height:1.5}
   .wrap{display:none}
 }
 
-
+/* ═══ PIN LOCK SCREEN ═══════════════════════════════════════ */
+.pin-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg);transition:opacity .35s}
+.pin-overlay.hide{opacity:0;pointer-events:none}
+.pin-box{width:320px;max-width:92vw;background:var(--card);border-radius:20px;padding:32px 28px 28px;border:1px solid var(--bdr);box-shadow:0 16px 60px rgba(0,0,0,.18);text-align:center;animation:pinIn .3s ease both}
+@keyframes pinIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+.pin-logo{font-family:var(--ff-s);font-size:1.4rem;color:var(--text);margin-bottom:4px}
+.pin-logo em{color:var(--gold);font-style:normal}
+.pin-tagline{font-size:.65rem;color:var(--t2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:28px}
+.pin-dots{display:flex;justify-content:center;gap:14px;margin-bottom:24px}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--bdr);background:transparent;transition:.15s}
+.pin-dot.filled{background:var(--gold);border-color:var(--gold)}
+.pin-dot.error{background:var(--R);border-color:var(--R);animation:shake .3s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.pin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.pin-key{border:1.5px solid var(--bdr);background:var(--bg2);border-radius:12px;padding:0;height:54px;font-size:1.15rem;font-weight:700;color:var(--text);cursor:pointer;font-family:var(--ff);transition:.12s;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-tap-highlight-color:transparent}
+.pin-key:active{background:var(--goldbg);border-color:var(--gold);transform:scale(.94)}
+.pin-key.zero{grid-column:2}
+.pin-key.del{border-color:transparent;background:transparent;font-size:1rem;color:var(--t2)}
+.pin-key.del:active{color:var(--R)}
+.pin-err{font-size:.72rem;color:var(--R);min-height:20px;margin-top:4px;font-weight:500}
+.pin-hint{font-size:.65rem;color:var(--t2);margin-top:12px}
+.pin-hint a{color:var(--gold);cursor:pointer;text-decoration:underline}
+/* Settings PIN section */
 .pin-change-row{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
 .pin-change-row input{width:80px;border:1.5px solid var(--bdr);border-radius:8px;padding:8px 10px;font-size:1rem;font-family:var(--ff-m);text-align:center;letter-spacing:.25em;color:var(--text);background:var(--inp);-webkit-appearance:none}
 .pin-change-row input:focus{outline:none;border-color:var(--gold)}
 
-/* ═══ AUTH SCREEN ══════════════════════════════════════════ */
-.auth-overlay{position:fixed;inset:0;z-index:9000;background:var(--savbg);display:flex;align-items:center;justify-content:center;padding:16px}
-.auth-box{background:var(--card);border-radius:18px;padding:28px 22px;width:100%;max-width:380px;border:1.5px solid var(--gold);box-shadow:0 20px 60px rgba(0,0,0,.4)}
-.auth-logo{font-family:var(--ff-s);font-size:1.6rem;color:var(--text);text-align:center;margin-bottom:4px}
-.auth-logo em{color:var(--gold);font-style:normal}
-.auth-tagline{font-size:.65rem;color:var(--t2);text-align:center;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px}
-.auth-tabs{display:flex;gap:3px;background:rgba(197,168,128,.1);border-radius:9px;padding:3px;margin-bottom:18px}
-.auth-tab{flex:1;padding:7px 0;border:none;border-radius:7px;cursor:pointer;font-size:.72rem;font-weight:600;font-family:var(--ff);background:transparent;color:var(--sage);transition:.14s}
-.auth-tab.act{background:var(--ta);color:var(--tat)}
-.auth-field{margin-bottom:12px}
-.auth-field label{display:block;font-size:.63rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--t2);margin-bottom:4px}
-.auth-field input{width:100%;border:1.5px solid var(--bdr);border-radius:9px;padding:10px 12px;font-size:.82rem;font-family:var(--ff);color:var(--text);background:var(--inp);-webkit-appearance:none;transition:.12s}
-.auth-field input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(197,168,128,.1)}
-.auth-btn{width:100%;padding:12px;border:none;border-radius:10px;background:var(--gold);color:var(--tat);font-size:.85rem;font-family:var(--ff);font-weight:700;cursor:pointer;transition:.12s;margin-top:4px}
-.auth-btn:hover{filter:brightness(1.07)}.auth-btn:active{filter:brightness(.92)}
-.auth-btn:disabled{opacity:.5;cursor:not-allowed}
-.auth-err{font-size:.72rem;color:var(--R);text-align:center;margin-top:8px;min-height:18px}
-.auth-ok{font-size:.72rem;color:var(--G);text-align:center;margin-top:8px}
-.auth-sep{text-align:center;font-size:.62rem;color:var(--t3);margin:12px 0}
-.auth-user-bar{background:var(--savbg);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--gold);font-size:.68rem;color:var(--sage)}
-.auth-user-bar em{color:var(--gold);font-style:normal}
-/* SYNC DOT */
+/* ═══ AUTH + SYNC ══════════════════════════════════════════ */
 .sync-dot{width:8px;height:8px;border-radius:50%;background:#555;display:inline-block;margin-right:4px;transition:background .3s;vertical-align:middle}
-.sync-dot.ok{background:#5D9970}.sync-dot.sync{background:#C5A880;animation:sp .8s infinite}.sync-dot.err{background:#BE6050}
-@keyframes sp{0%,100%{opacity:1}50%{opacity:.2}}
-/* LOADING */
-.fb-loading{position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
-.fb-loading .fl-logo{font-family:var(--ff-s);font-size:1.6rem;color:var(--text)}.fb-loading .fl-logo em{color:var(--gold);font-style:normal}
-.fl-dots{display:flex;gap:6px}.fl-d{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:fld .8s infinite}
-.fl-d:nth-child(2){animation-delay:.15s}.fl-d:nth-child(3){animation-delay:.3s}
-@keyframes fld{0%,80%,100%{transform:scale(.5);opacity:.4}40%{transform:scale(1);opacity:1}}
-.fl-txt{font-size:.65rem;color:var(--t2);letter-spacing:.06em}
-/* DASHBOARD */
-.dash-score{background:var(--savbg);border-radius:14px;padding:14px;margin-bottom:11px}
-.dash-score h4{font-family:var(--ff-s);font-size:.88rem;color:var(--gold);margin-bottom:12px}
-.score-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.score-item{text-align:center;background:rgba(255,255,255,.04);border-radius:9px;padding:10px 6px}
-.score-circle{font-family:var(--ff-m);font-size:1.2rem;font-weight:700;color:var(--gold);line-height:1}
-.score-circle.ok{color:var(--G)}.score-circle.warn{color:var(--gold)}.score-circle.bad{color:var(--R)}
-.score-lbl{font-size:.52rem;color:var(--sage);margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
-.score-sub{font-size:.58rem;color:var(--t3);margin-top:2px}
-.alert-box{background:var(--Rbg);border-radius:10px;padding:10px 12px;margin-bottom:8px;border-left:3px solid var(--R);font-size:.74rem}
-.gcal-btn{background:var(--B);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:.72rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:var(--ff)}
-.annual-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:11px}
-@media(min-width:460px){.annual-grid{grid-template-columns:repeat(4,1fr)}}
+.sync-dot.ok{background:#5D9970}.sync-dot.sync{background:#C5A880;animation:sdp .8s infinite}.sync-dot.err{background:#BE6050}
+@keyframes sdp{0%,100%{opacity:1}50%{opacity:.2}}
+.fb-loading{position:fixed;inset:0;z-index:99999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.fl-logo{font-family:var(--ff-s);font-size:1.6rem;color:var(--text)}.fl-logo em{color:var(--gold);font-style:normal}
+.fl-dots{display:flex;gap:7px}.fl-d{width:9px;height:9px;border-radius:50%;background:var(--gold);animation:fld .8s infinite}
+.fl-d:nth-child(2){animation-delay:.16s}.fl-d:nth-child(3){animation-delay:.32s}
+@keyframes fld{0%,80%,100%{transform:scale(.4);opacity:.3}40%{transform:scale(1);opacity:1}}
+.fl-txt{font-size:.66rem;color:var(--t2);letter-spacing:.07em}
 </style>
 </head>
 <body>
 
-<!-- AUTH SCREEN -->
+<!-- LOADING -->
 <div class="fb-loading" id="fbLoading">
   <div class="fl-logo">Vie <em>Équilibrée</em></div>
   <div class="fl-dots"><div class="fl-d"></div><div class="fl-d"></div><div class="fl-d"></div></div>
   <div class="fl-txt">Chargement…</div>
 </div>
 
+<!-- AUTH -->
 <div id="authOverlay" style="display:none;position:fixed;inset:0;z-index:9000;background:#0a0a09;align-items:center;justify-content:center;padding:16px">
-  <div style="background:#222220;border-radius:18px;padding:28px 22px;width:100%;max-width:360px;border:1.5px solid #C5A880">
-    <div style="font-family:Georgia,serif;font-size:1.5rem;color:#EAE6DE;text-align:center;margin-bottom:4px">Vie <span style="color:#C5A880">Équilibrée</span></div>
-    <div style="font-size:.62rem;color:#7A7A72;text-align:center;letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px">Gestion globale de vie</div>
-
-    <!-- MODE SELECTOR -->
-    <div style="display:flex;gap:4px;margin-bottom:18px">
-      <button id="btn-mode-login" onclick="authMode('login')"
-        style="flex:1;padding:8px;border-radius:8px;border:none;background:#C5A880;color:#141412;font-size:.75rem;font-weight:700;cursor:pointer;font-family:system-ui">
-        🔑 Connexion
-      </button>
-      <button id="btn-mode-register" onclick="authMode('register')"
-        style="flex:1;padding:8px;border-radius:8px;border:1.5px solid #C5A880;background:transparent;color:#C5A880;font-size:.75rem;font-weight:700;cursor:pointer;font-family:system-ui">
-        ✨ Inscription
-      </button>
+  <div style="background:#1C1C1A;border-radius:18px;padding:26px 20px;width:100%;max-width:340px;border:1.5px solid #C5A880;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+    <div style="font-family:Georgia,serif;font-size:1.4rem;color:#EAE6DE;text-align:center;margin-bottom:3px">Vie <span style="color:#C5A880">Équilibrée</span></div>
+    <div style="font-size:.6rem;color:#7A7A72;text-align:center;letter-spacing:.08em;text-transform:uppercase;margin-bottom:18px">Gestion globale de vie</div>
+    <div id="auth-mode-btns" style="display:flex;gap:4px;margin-bottom:16px">
+      <button id="btn-login" style="flex:1;padding:8px;border-radius:8px;border:none;background:#C5A880;color:#141412;font-size:.74rem;font-weight:700;cursor:pointer;font-family:system-ui" onclick="authMode('login')">🔑 Connexion</button>
+      <button id="btn-reg" style="flex:1;padding:8px;border-radius:8px;border:1.5px solid #C5A880;background:transparent;color:#C5A880;font-size:.74rem;font-weight:700;cursor:pointer;font-family:system-ui" onclick="authMode('register')">✨ Inscription</button>
     </div>
-
-    <!-- LOGIN FORM -->
     <div id="form-login">
-      <div style="margin-bottom:10px">
-        <div style="font-size:.62rem;color:#7A7A72;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">📧 Email</div>
-        <input id="login-email" type="email" placeholder="votre@email.com"
-          style="width:100%;border:1.5px solid #333;border-radius:8px;padding:10px 12px;font-size:.82rem;background:#1C1C1A;color:#EAE6DE;font-family:system-ui;box-sizing:border-box"/>
-      </div>
-      <div style="margin-bottom:14px">
-        <div style="font-size:.62rem;color:#7A7A72;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">🔒 Mot de passe</div>
-        <input id="login-pwd" type="password" placeholder="••••••••"
-          style="width:100%;border:1.5px solid #333;border-radius:8px;padding:10px 12px;font-size:.82rem;background:#1C1C1A;color:#EAE6DE;font-family:system-ui;box-sizing:border-box"/>
-      </div>
-      <button onclick="doLogin()"
-        style="width:100%;padding:12px;border:none;border-radius:10px;background:#C5A880;color:#141412;font-size:.85rem;font-weight:700;cursor:pointer;font-family:system-ui;margin-bottom:8px">
-        Se connecter
-      </button>
-      <button onclick="doGoogle()"
-        style="width:100%;padding:10px;border:none;border-radius:10px;background:#5D7FA8;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;font-family:system-ui">
-        🌐 Continuer avec Google
-      </button>
+      <input id="li-email" type="email" placeholder="📧 Email" style="width:100%;border:1.5px solid #333;border-radius:8px;padding:10px 12px;font-size:.8rem;background:#111;color:#EAE6DE;font-family:system-ui;box-sizing:border-box;margin-bottom:8px"/><br>
+      <input id="li-pwd" type="password" placeholder="🔒 Mot de passe" style="width:100%;border:1.5px solid #333;border-radius:8px;padding:10px 12px;font-size:.8rem;background:#111;color:#EAE6DE;font-family:system-ui;box-sizing:border-box;margin-bottom:12px"/>
+      <button onclick="doLogin()" style="width:100%;padding:11px;border:none;border-radius:9px;background:#C5A880;color:#141412;font-size:.82rem;font-weight:700;cursor:pointer;font-family:system-ui;margin-bottom:7px">Se connecter</button>
+      <button onclick="doGoogle()" style="width:100%;padding:10px;border:none;border-radius:9px;background:#5D7FA8;color:#fff;font-size:.78rem;font-weight:700;cursor:pointer;font-family:system-ui">🌐 Continuer avec Google</button>
     </div>
-
-    <!-- REGISTER FORM -->
-    <div id="form-register" style="display:none">
-      <div style="margin-bottom:10px">
-        <div style="font-size:.62rem;color:#7A7A72;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">👤 Nom</div>
-        <input id="reg-name" type="text" placeholder="Votre prénom"
-          style="width:100%;border:1.5px solid #333;border-radius:8px;padding:10px 12px;font-size:.82rem;background:#1C1C1A;color:#EAE6DE;font-family:system-ui;box-sizing:border-box"/>
-      </div>
-      <div style="margin-bottom:10px">
-        <div style="font-size:.62rem;color:#7A7A72;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">📧 Email</div>
-        <input id="reg-email" type="email" placeholder="votre@email.com"
-          style="width:100%;border:1.5px solid #333;border-radius:8px;padding:10px 12px;font-size:.82rem;background:#1C1C1A;color:#EAE6DE;font-family:system-ui;box-sizing:border-box"/>
-      </div>
-      <div style="margin-bottom:14px">
-        <div style="font-size:.62rem;color:#7A7A72;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">🔒 Mot de passe</div>
-        <input id="reg-pwd" type="password" placeholder="Min. 6 caractères"
-          style="width:100%;border:1.5px solid #333;border-radius:8px;padding:10px 12px;font-size:.82rem;background:#1C1C1A;color:#EAE6DE;font-family:system-ui;box-sizing:border-box"/>
-      </div>
-      <button onclick="doRegister()"
-        style="width:100%;padding:12px;border:none;border-radius:10px;background:#C5A880;color:#141412;font-size:.85rem;font-weight:700;cursor:pointer;font-family:system-ui">
-        Créer mon compte
-      </button>
+    <div id="form-reg" style="display:none">
+      <input id="re-name" type="text" placeholder="👤 Prénom" style="width:100%;border:1.5px solid #333;border-radius:8px;padding:10px 12px;font-size:.8rem;background:#111;color:#EAE6DE;font-family:system-ui;box-sizing:border-box;margin-bottom:8px"/><br>
+      <input id="re-email" type="email" placeholder="📧 Email" style="width:100%;border:1.5px solid #333;border-radius:8px;padding:10px 12px;font-size:.8rem;background:#111;color:#EAE6DE;font-family:system-ui;box-sizing:border-box;margin-bottom:8px"/><br>
+      <input id="re-pwd" type="password" placeholder="🔒 Mot de passe (min. 6 car.)" style="width:100%;border:1.5px solid #333;border-radius:8px;padding:10px 12px;font-size:.8rem;background:#111;color:#EAE6DE;font-family:system-ui;box-sizing:border-box;margin-bottom:12px"/>
+      <button onclick="doRegister()" style="width:100%;padding:11px;border:none;border-radius:9px;background:#C5A880;color:#141412;font-size:.82rem;font-weight:700;cursor:pointer;font-family:system-ui">Créer mon compte</button>
     </div>
-
-    <div id="auth-err" style="font-size:.72rem;color:#BE6050;text-align:center;margin-top:10px;min-height:18px"></div>
+    <div id="auth-err" style="font-size:.72rem;color:#BE6050;text-align:center;margin-top:10px;min-height:16px"></div>
   </div>
 </div>
 
@@ -476,7 +422,16 @@ textarea.txtin{resize:vertical;min-height:52px;line-height:1.5}
     </div>
   </div>
   <div class="msec"><h3>✨ Habitudes <button class="btn btno btnxs" onclick="addHabR()" style="margin-left:6px">+ Ajouter</button></h3><div id="s_hab"></div></div>
-  
+  <div class="msec"><h3>🔐 Code PIN</h3>
+    <p style="font-size:.72rem;color:var(--t2);margin-bottom:10px">Modifiez votre code PIN à 4 chiffres. Le nouveau PIN sera actif immédiatement.</p>
+    <div class="pin-change-row">
+      <input type="password" inputmode="numeric" maxlength="4" id="st_pin_new" placeholder="••••"/>
+      <input type="password" inputmode="numeric" maxlength="4" id="st_pin_confirm" placeholder="Confirmer"/>
+      <button class="btn btng btnxs" onclick="changePin()">Changer</button>
+      <button class="btn btno btnxs" onclick="removePin()">Supprimer</button>
+    </div>
+    <div id="pin_msg" style="font-size:.7rem;min-height:18px;margin-top:6px"></div>
+  </div>
   <div style="display:flex;gap:8px">
     <button class="btn btng btnfull" onclick="saveS()">✓ Enregistrer tout</button>
     <button class="btn btno btnxs" onclick="resetAll()" style="padding:8px 11px">🗑</button>
@@ -499,7 +454,7 @@ textarea.txtin{resize:vertical;min-height:52px;line-height:1.5}
     <div class="csep"></div>
     <div><div class="clk-t" id="clkT">--:--:--</div><div class="clk-d" id="clkD">—</div></div>
   </div>
-  <span class="sync-dot" id="syncDot"></span><span id="user-email-short" style="font-size:.58rem;color:var(--sage);margin-right:6px"></span><button class="ibtn" onclick="doLogout()" title="Déconnexion">🚪</button><button class="ibtn" onclick="openS()">⚙️</button>
+  <span class="sync-dot ok" id="syncDot"></span><span id="uname" style="font-size:.6rem;color:var(--sage);margin-right:5px"></span><button class="ibtn" onclick="doLogout()" title="Déconnexion">🚪</button><button class="ibtn" onclick="openS()">⚙️</button>
 </header>
 
 <!-- DESKTOP SPLIT -->
@@ -519,14 +474,12 @@ textarea.txtin{resize:vertical;min-height:52px;line-height:1.5}
 <!-- MOBILE -->
 <div class="wrap" id="appWrap">
   <nav class="bnav" id="bnav">
-    <button class="nb" onclick="goPage('dashboard',this)"><span class="ni">🏠</span>Dashboard</button>
     <button class="nb act" onclick="goPage('jour',this)"><span class="ni">📅</span>Jour</button>
     <button class="nb" onclick="goPage('hebdo',this)"><span class="ni">📆</span>Hebdo</button>
     <button class="nb" onclick="goPage('mensuel',this)"><span class="ni">🗓</span>Mensuel</button>
     <button class="nb" onclick="goPage('courses',this)"><span class="ni">🛒</span>Courses</button>
     <button class="nb" onclick="goPage('revenus',this)"><span class="ni">💵</span>Revenus</button>
   </nav>
-  <div class="page" id="pg-dashboard"></div>
   <div class="page act" id="pg-jour"></div>
   <div class="page" id="pg-hebdo"></div>
   <div class="page" id="pg-mensuel"></div>
@@ -653,9 +606,9 @@ function realWkAvg(){
 }
 
 // ═══ PERSIST ═══
-function persist(silent){localStorage.setItem('vf1d',JSON.stringify(AD));fbSave('AD',AD);if(!silent)toast('Sauvegardé ✓')}
-function persistI(){localStorage.setItem('vf1i',JSON.stringify(INC));fbSave('INC',INC);}
-function persistC(){localStorage.setItem('vf1c',JSON.stringify(C));fbSave('CFG',C);}
+function persist(silent){localStorage.setItem('vf1d',JSON.stringify(AD));if(window.fbSave)window.fbSave('AD',AD);if(!silent)toast('Sauvegardé ✓')}
+function persistI(){localStorage.setItem('vf1i',JSON.stringify(INC));if(window.fbSave)window.fbSave('INC',INC);}
+function persistC(){localStorage.setItem('vf1c',JSON.stringify(C));if(window.fbSave)window.fbSave('CFG',C);}
 function loadAll(){
   try{const r=localStorage.getItem('vf1d');if(r)AD=JSON.parse(r)}catch(e){}
   try{const r=localStorage.getItem('vf1i');if(r)INC=JSON.parse(r)}catch(e){}
@@ -664,7 +617,7 @@ function loadAll(){
 }
 
 // ═══ THEME ═══
-function setTheme(th){CURTH=th;document.documentElement.setAttribute('data-theme',th);localStorage.setItem('vf1t',th);fbSave('THEME',{v:th});updTC()}
+function setTheme(th){CURTH=th;document.documentElement.setAttribute('data-theme',th);localStorage.setItem('vf1t',th);if(window.fbSave)window.fbSave('THEME',{v:th});updTC()}
 function updTC(){document.querySelectorAll('.tcard').forEach(c=>c.classList.toggle('sel',c.dataset.th===CURTH))}
 
 // ═══ CLOCK ═══
@@ -696,14 +649,11 @@ function swRt(name,btn){
   renderRC();
 }
 function renderPage(name){
-  try{
-    if(name==='dashboard')renderDashboard();
-    else if(name==='jour')renderJour();
-    else if(name==='hebdo')renderHebdo();
-    else if(name==='mensuel')renderMensuel();
-    else if(name==='courses')renderCourses();
-    else if(name==='revenus')renderRevenus();
-  }catch(e){console.error('renderPage error:',name,e);}
+  if(name==='jour')renderJour();
+  else if(name==='hebdo')renderHebdo();
+  else if(name==='mensuel')renderMensuel();
+  else if(name==='courses')renderCourses();
+  else if(name==='revenus')renderRevenus();
 }
 function renderAll(){
   // Render currently visible page
@@ -1328,18 +1278,17 @@ function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.c
 var rto;window.addEventListener('resize',function(){clearTimeout(rto);rto=setTimeout(renderAll,220)});
 
 
-// ═══ AUTH HELPERS (Firebase Auth handles actual auth) ═══
-var _pinLocked = true; // kept for compatibility
-var _pinBuf = ''; // kept for compatibility
-window.showTab=function showTab(t){
-  document.getElementById('auth-login').style.display = t==='login'?'block':'none';
-  document.getElementById('auth-register').style.display = t==='register'?'block':'none';
-  document.getElementById('tab-login').classList.toggle('act', t==='login');
-  document.getElementById('tab-register').classList.toggle('act', t==='register');
-  document.getElementById('auth-err').textContent='';
-};
+// ═══ PIN SYSTEM ════════════════════════════════════════════
+var PIN_KEY     = 'vf1pin';
+var PIN_DEFAULT = '1234';
+var _pinBuf     = '';
+var _pinLocked  = true;
 
-function _getPin(){return '';}
+function _getPin() {
+  var p = localStorage.getItem(PIN_KEY);
+  return (p && p.length === 4) ? p : PIN_DEFAULT;
+}
+
 function pinPress(d) {
   if (_pinBuf.length >= 4) return;
   _pinBuf += d;
@@ -1421,275 +1370,168 @@ function removePin() {
   setTimeout(function() { if (msg) msg.textContent = ''; }, 3000);
 }
 
-function initPinScreen(){} // now handled by Firebase Auth
-
-// ═══ DASHBOARD ═══
-function renderDashboard(){
-  var el=document.getElementById('pg-dashboard');if(!el)return;
-  var inc=totalInc(),dime=dimeAmt(),mr=monthReal();
-  var spend=mr.spend,hdone=mr.hdone,htot=mr.htot,daysIn=mr.daysIn,tdone=mr.tdone,ttot=mr.ttot,dim=mr.dim;
-  var env=envelope();
-  var k=key(cy,cm,cd),dc=dayComp(k),d=initD(k);
-  var tDone=(d.tasks||[]).filter(function(t){return t.done}).length;
-  var tTot=(d.tasks||[]).length;
-  var spent=dayRealSpend(k);
-  var dayHabPct=dc.pct;
-  var dayTaskPct=tTot>0?Math.round((tDone/tTot)*100):0;
-  var dayBudOk=env!==null?(spent<=env?100:Math.max(0,Math.round((1-(spent-env)/env)*100))):100;
-  var dayScore=Math.round((dayHabPct+dayTaskPct+dayBudOk)/3);
-  var moHabPct=htot>0?Math.round((hdone/htot)*100):0;
-  var moTaskPct=ttot>0?Math.round((tdone/ttot)*100):0;
-  var budPct=inc>0?Math.min(100,Math.round(((inc-spend)/inc)*100)):0;
-  var moScore=Math.round((moHabPct+moTaskPct+budPct)/3);
-  var annScore=realHabRate()||0;
-  function sc(p){return p>=80?'ok':p>=50?'warn':'bad';}
-  var h='<div class="ph"><div class="ph-row"><div class="ph-title">🏠 <em>Dashboard</em></div><div class="ph-sub">'+MN[cm]+' '+cy+'</div></div></div>';
-  h+='<div class="dash-score"><h4>🎯 Scores d'accomplissement</h4><div class="score-grid">';
-  h+='<div class="score-item"><div class="score-circle '+sc(dayScore)+'">'+dayScore+'%</div><div class="score-lbl">Aujourd'hui</div><div class="score-sub">'+cd+' '+MN[cm].slice(0,3)+'</div></div>';
-  h+='<div class="score-item"><div class="score-circle '+sc(moScore)+'">'+moScore+'%</div><div class="score-lbl">Ce mois</div><div class="score-sub">'+MN[cm]+'</div></div>';
-  h+='<div class="score-item"><div class="score-circle '+sc(annScore)+'">'+annScore+'%</div><div class="score-lbl">Annuel</div><div class="score-sub">'+(cm+1)+' mois</div></div>';
-  h+='</div><div style="margin-top:12px">';
-  h+='<div class="pw"><div class="pm"><span>Habitudes aujourd'hui</span><span>'+dayHabPct+'%</span></div><div class="pt"><div class="pf pf-g" style="width:'+dayHabPct+'%"></div></div></div>';
-  h+='<div class="pw"><div class="pm"><span>Habitudes ce mois</span><span>'+moHabPct+'%</span></div><div class="pt"><div class="pf pf-G" style="width:'+moHabPct+'%"></div></div></div>';
-  h+='<div class="pw"><div class="pm"><span>Budget restant</span><span>'+budPct+'%</span></div><div class="pt"><div class="pf '+(budPct<20?'pf-R':'pf-B')+'" style="width:'+budPct+'%"></div></div></div>';
-  h+='<div class="pw"><div class="pm"><span>Tâches mois</span><span>'+moTaskPct+'%</span></div><div class="pt"><div class="pf pf-P" style="width:'+moTaskPct+'%"></div></div></div>';
-  h+='</div></div>';
-  var alerts=[];
-  if(env!==null&&spent>env)alerts.push('⚠️ Budget journalier dépassé de <strong>'+fmt(spent-env)+' Ar</strong>');
-  if(inc>0&&spend>inc*0.9)alerts.push('🔴 Dépenses mois > 90% du revenu');
-  if(dayHabPct<50&&cd>1)alerts.push('📉 Habitudes du jour < 50%');
-  if(alerts.length>0){h+='<div style="margin-bottom:11px">';alerts.forEach(function(a){h+='<div class="alert-box">'+a+'</div>';});h+='</div>';}
-  h+='<div class="krow k4">';
-  h+='<div class="kpi kg"><div class="kv ok">'+fmt(inc)+'</div><div class="kk">Revenus '+MN[cm].slice(0,3)+'</div></div>';
-  h+='<div class="kpi kr"><div class="kv '+(spend>inc?'bad':'')+'">'+fmt(spend)+'</div><div class="kk">Dépenses</div></div>';
-  h+='<div class="kpi '+(inc-spend>=0?'kg':'kr')+'"><div class="kv '+(inc-spend>=0?'ok':'bad')+'">'+fmt(Math.abs(inc-spend))+'</div><div class="kk">Solde</div></div>';
-  h+='<div class="kpi kp"><div class="kv gld">'+fmt(dime)+'</div><div class="kk">Dîme</div></div>';
-  h+='</div>';
-  h+='<div class="card l-g"><div class="ctop"><div class="ctitle"><span class="ci ci-G">📅</span>Aujourd'hui — '+cd+' '+MN[cm]+'</div></div>';
-  h+='<div class="sr"><span>Habitudes</span><span class="sv '+sc(dayHabPct)+'">'+dc.done+'/'+dc.total+' ('+dayHabPct+'%)</span></div>';
-  h+='<div class="sr"><span>Tâches</span><span class="sv">'+tDone+'/'+tTot+'</span></div>';
-  h+='<div class="sr"><span>Dépensé aujourd'hui</span><span class="sv '+(env!==null&&spent>env?'bad':'ok')+'">'+fmt(spent)+' Ar</span></div>';
-  if(env!==null)h+='<div class="sr"><span>Enveloppe journalière</span><span class="sv gld">'+fmt(env)+' Ar</span></div>';
-  h+='</div>';
-  // Google Calendar
-  h+='<div class="card l-B"><div class="ctop"><div class="ctitle"><span class="ci ci-B">📅</span>Google Calendar</div></div>';
-  var tasks2=(d.tasks||[]).filter(function(t){return !t.done;});
-  if(!tasks2.length){h+='<p style="font-size:.72rem;color:var(--t3)">Aucune tâche non terminée.</p>';}
-  else{tasks2.forEach(function(t){var title=encodeURIComponent(t.name);var ds=cy+p2(cm+1)+p2(cd);var gcUrl='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+title+'&dates='+ds+'T080000/'+ds+'T090000';h+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bdr)"><span style="font-size:.76rem">'+escHtml(t.name)+'</span><a href="'+gcUrl+'" target="_blank" style="text-decoration:none"><button class="gcal-btn">📅 Ajouter</button></a></div>';});}
-  h+='<div style="margin-top:10px"><a href="https://calendar.google.com" target="_blank" style="text-decoration:none"><button class="gcal-btn" style="width:100%;justify-content:center">🗓 Ouvrir Google Calendar</button></a></div></div>';
-  // Annuel
-  h+='<div class="dash-score"><h4>📈 Vision annuelle '+cy+'</h4><div class="annual-grid">';
-  h+='<div class="sgi"><div class="sgv">'+(cm+1)+'/12</div><div class="sgk">Mois écoulés</div></div>';
-  h+='<div class="sgi"><div class="sgv">'+annScore+'%</div><div class="sgk">Score annuel</div></div>';
-  h+='<div class="sgi"><div class="sgv">'+fmt(inc*(cm+1))+'</div><div class="sgk">Revenus cumulés Ar</div></div>';
-  h+='<div class="sgi"><div class="sgv">'+fmt(C.savings*(cm+1))+'</div><div class="sgk">Épargne cible Ar</div></div>';
-  h+='</div></div>';
-  el.innerHTML=h;
-}
-
-// ═══ INIT (called by Firebase Auth after login) ═══
+// ═══ INIT — called by Firebase after login ═══
 function appStart(){
   loadAll();
   var td=new Date();cy=td.getFullYear();cm=td.getMonth();cd=td.getDate();
-  // Make sure jour page is active by default
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('act');});
-  var jour=document.getElementById('pg-jour');
-  if(jour)jour.classList.add('act');
-  document.querySelectorAll('.nb').forEach(function(b,i){b.classList.toggle('act',i===1);});
-  try{renderAll();}catch(e){console.error('renderAll error:',e);}
+  renderAll();
   tick();
   setInterval(tick,1000);
 }
 
-// Window setters for Firebase module
-window._appSetAD=function(r){Object.keys(AD).forEach(function(k2){if(!(k2 in r))delete AD[k2];});Object.assign(AD,r);};
-window._appSetINC=function(r){Object.keys(INC).forEach(function(k2){if(!(k2 in r))delete INC[k2];});Object.assign(INC,r);};
-window._appSetC=function(r){Object.assign(C,r);};
+// Expose setters for Firebase module to update let variables
+window._setAD=function(r){Object.keys(AD).forEach(function(k){if(!(k in r))delete AD[k];});Object.assign(AD,r);};
+window._setINC=function(r){Object.keys(INC).forEach(function(k){if(!(k in r))delete INC[k];});Object.assign(INC,r);};
+window._setC=function(r){Object.assign(C,r);};
+
 </script>
 
-
 <script>
-// Simple auth mode switcher - global, no module issues
-function authMode(mode) {
-  var isLogin = mode === 'login';
-  document.getElementById('form-login').style.display = isLogin ? 'block' : 'none';
-  document.getElementById('form-register').style.display = isLogin ? 'none' : 'block';
-  // Update button styles
-  document.getElementById('btn-mode-login').style.background = isLogin ? '#C5A880' : 'transparent';
-  document.getElementById('btn-mode-login').style.color = isLogin ? '#141412' : '#C5A880';
-  document.getElementById('btn-mode-login').style.border = isLogin ? 'none' : '1.5px solid #C5A880';
-  document.getElementById('btn-mode-register').style.background = isLogin ? 'transparent' : '#C5A880';
-  document.getElementById('btn-mode-register').style.color = isLogin ? '#C5A880' : '#141412';
-  document.getElementById('btn-mode-register').style.border = isLogin ? '1.5px solid #C5A880' : 'none';
-  document.getElementById('auth-err').textContent = '';
+// Auth mode switcher - plain script, accessible from onclick
+function authMode(m){
+  var isL=m==='login';
+  document.getElementById('form-login').style.display=isL?'block':'none';
+  document.getElementById('form-reg').style.display=isL?'none':'block';
+  var bl=document.getElementById('btn-login'),br=document.getElementById('btn-reg');
+  if(bl){bl.style.background=isL?'#C5A880':'transparent';bl.style.color=isL?'#141412':'#C5A880';bl.style.border=isL?'none':'1.5px solid #C5A880';}
+  if(br){br.style.background=isL?'transparent':'#C5A880';br.style.color=isL?'#C5A880':'#141412';br.style.border=isL?'1.5px solid #C5A880':'none';}
+  document.getElementById('auth-err').textContent='';
 }
-</script>
-
-<script>
-var _fbQueue={};
-var _fbUID=null;
-function fbSave(key,data){if(window._fbSaveReal)window._fbSaveReal(key,data);else _fbQueue[key]=data;}
 function syncDot(s){var d=document.getElementById('syncDot');if(d)d.className='sync-dot '+s;}
-function setAuthErr(msg){var e=document.getElementById('auth-err');if(e)e.textContent=msg;}
-function setBtnLoading(id,loading){var b=document.getElementById(id);if(b)b.disabled=loading;}
+function setAuthErr(m){var e=document.getElementById('auth-err');if(e)e.textContent=m;}
 </script>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getFirestore,doc,setDoc,getDoc,onSnapshot}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,updateProfile}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-const firebaseConfig={
-  apiKey:"AIzaSyAdfIiIMRevlNcyNhueJq2fzRdD53XBT1I",
-  authDomain:"mon-outil-budget.firebaseapp.com",
-  projectId:"mon-outil-budget",
-  storageBucket:"mon-outil-budget.firebasestorage.app",
-  messagingSenderId:"528991480334",
-  appId:"1:528991480334:web:2bf07bf807e2f9c148aa5f"
-};
-
-const app=initializeApp(firebaseConfig);
+const cfg={apiKey:"AIzaSyAdfIiIMRevlNcyNhueJq2fzRdD53XBT1I",authDomain:"mon-outil-budget.firebaseapp.com",projectId:"mon-outil-budget",storageBucket:"mon-outil-budget.firebasestorage.app",messagingSenderId:"528991480334",appId:"1:528991480334:web:2bf07bf807e2f9c148aa5f"};
+const app=initializeApp(cfg);
 const db=getFirestore(app);
 const auth=getAuth(app);
-const googleProvider=new GoogleAuthProvider();
-let saveTimers={};
-let unsubListeners=[];
+const gp=new GoogleAuthProvider();
+let timers={},uid=null,unsubs=[];
 
-// ── Save to Firebase (per user) ──
-window._fbSaveReal=function(key,data){
-  if(!_fbUID)return;
-  clearTimeout(saveTimers[key]);
+// ── Save ──
+window.fbSave=function(key,data){
+  if(!uid)return;
+  clearTimeout(timers[key]);
   syncDot('sync');
-  saveTimers[key]=setTimeout(async()=>{
-    try{
-      await setDoc(doc(db,'users',_fbUID,key,'data'),{json:JSON.stringify(data)});
-      syncDot('ok');
-    }catch(e){syncDot('err');console.error(e);}
+  timers[key]=setTimeout(async()=>{
+    try{await setDoc(doc(db,'users',uid,key,'d'),{j:JSON.stringify(data)});syncDot('ok');}
+    catch(e){syncDot('err');console.error(e);}
   },700);
 };
 
-// ── Load data from Firebase for this user ──
-async function loadUserData(uid){
-  try{
-    const keys=['AD','INC','CFG'];
-    for(const k of keys){
-      const snap=await getDoc(doc(db,'users',uid,k,'data'));
-      if(snap.exists()){
-        const data=JSON.parse(snap.data().json||'{}');
-        localStorage.setItem(k==='AD'?'vf1d':k==='INC'?'vf1i':'vf1c',JSON.stringify(data));
-        if(k==='AD'&&window._appSetAD)window._appSetAD(data);
-        if(k==='INC'&&window._appSetINC)window._appSetINC(data);
-        if(k==='CFG'&&window._appSetC)window._appSetC(data);
+// ── Load all user data ──
+async function loadUser(u){
+  uid=u.uid;
+  const nm=u.displayName||u.email.split('@')[0];
+  const el=document.getElementById('uname');if(el)el.textContent=nm;
+  const keys={AD:'vf1d',INC:'vf1i',CFG:'vf1c'};
+  for(const[k,ls]of Object.entries(keys)){
+    try{
+      const s=await getDoc(doc(db,'users',uid,k,'d'));
+      if(s.exists()){
+        const data=JSON.parse(s.data().j||'{}');
+        localStorage.setItem(ls,JSON.stringify(data));
+        if(k==='AD'&&window._setAD)window._setAD(data);
+        if(k==='INC'&&window._setINC)window._setINC(data);
+        if(k==='CFG'&&window._setC)window._setC(data);
       }
-    }
-  }catch(e){console.warn('loadUserData:',e);}
+    }catch(e){console.warn('load',k,e);}
+  }
 }
 
-// ── Setup realtime listeners for this user ──
-function setupListeners(uid){
-  // Unsubscribe previous
-  unsubListeners.forEach(u=>u());
-  unsubListeners=[];
-
-  const listen=(key,lsKey,setter)=>{
-    const unsub=onSnapshot(doc(db,'users',uid,key,'data'),snap=>{
+// ── Realtime listeners ──
+function listen(uid){
+  unsubs.forEach(f=>f());unsubs=[];
+  const watch=(key,ls,setter)=>{
+    const u=onSnapshot(doc(db,'users',uid,key,'d'),snap=>{
       if(!snap.exists())return;
       try{
-        const remote=JSON.parse(snap.data().json||'{}');
-        const local=JSON.parse(localStorage.getItem(lsKey)||'{}');
-        if(JSON.stringify(remote)!==JSON.stringify(local)){
-          localStorage.setItem(lsKey,JSON.stringify(remote));
-          if(setter)setter(remote);
+        const r=JSON.parse(snap.data().j||'{}');
+        const l=JSON.parse(localStorage.getItem(ls)||'{}');
+        if(JSON.stringify(r)!==JSON.stringify(l)){
+          localStorage.setItem(ls,JSON.stringify(r));
+          if(setter)setter(r);
           if(typeof renderAll==='function')renderAll();
           syncDot('ok');
         }
       }catch(e){}
     });
-    unsubListeners.push(unsub);
+    unsubs.push(u);
   };
-
-  listen('AD','vf1d',window._appSetAD);
-  listen('INC','vf1i',window._appSetINC);
-  listen('CFG','vf1c',window._appSetC);
+  watch('AD','vf1d',window._setAD);
+  watch('INC','vf1i',window._setINC);
+  watch('CFG','vf1c',window._setC);
 }
 
-// ── Auth state changed ──
-onAuthStateChanged(auth, async(user)=>{
+// ── Auth state ──
+onAuthStateChanged(auth,async user=>{
   document.getElementById('fbLoading').style.display='none';
+  const ao=document.getElementById('authOverlay');
   if(user){
-    // User logged in
-    _fbUID=user.uid;
-    var ao2=document.getElementById('authOverlay');if(ao2)ao2.style.display='none';
-    // Show email in topbar
-    var short=user.displayName||user.email.split('@')[0];
-    var el=document.getElementById('user-email-short');
-    if(el)el.textContent=short;
-    // Load data then start app
-    await loadUserData(user.uid);
-    setupListeners(user.uid);
-    // Flush queued saves
-    Object.keys(_fbQueue).forEach(k=>window._fbSaveReal(k,_fbQueue[k]));
+    if(ao)ao.style.display='none';
+    await loadUser(user);
+    listen(user.uid);
     if(typeof appStart==='function')appStart();
     syncDot('ok');
-  } else {
-    // Not logged in — show auth screen
-    _fbUID=null;
-    var ao=document.getElementById('authOverlay');if(ao){ao.style.display='flex';ao.style.alignItems='center';ao.style.justifyContent='center';}
+  }else{
+    uid=null;
+    if(ao){ao.style.display='flex';ao.style.alignItems='center';ao.style.justifyContent='center';}
     syncDot('err');
   }
 });
 
 // ── Login ──
-window.doLogin=async function doLogin(){
-  const email=(document.getElementById('login-email')||{}).value||'';
-  const pwd=(document.getElementById('login-pwd')||{}).value||'';
+window.doLogin=async function(){
+  const email=(document.getElementById('li-email')||{}).value||'';
+  const pwd=(document.getElementById('li-pwd')||{}).value||'';
   if(!email||!pwd){setAuthErr('Remplissez tous les champs.');return;}
-  setBtnLoading('login-btn',true);
-  setAuthErr('');
+  setAuthErr('Connexion…');
   try{
     await signInWithEmailAndPassword(auth,email,pwd);
+    setAuthErr('');
   }catch(e){
-    const msgs={'auth/user-not-found':'Compte introuvable.','auth/wrong-password':'Mot de passe incorrect.','auth/invalid-email':'Email invalide.','auth/too-many-requests':'Trop de tentatives. Réessayez plus tard.'};
-    setAuthErr(msgs[e.code]||'Erreur : '+e.message);
+    const m={'auth/user-not-found':'Compte introuvable.','auth/wrong-password':'Mot de passe incorrect.','auth/invalid-credential':'Email ou mot de passe incorrect.','auth/invalid-email':'Email invalide.','auth/too-many-requests':'Trop de tentatives.'};
+    setAuthErr(m[e.code]||'Erreur: '+e.message);
   }
-  setBtnLoading('login-btn',false);
 };
 
 // ── Register ──
-window.doRegister=async function doRegister(){
-  const name=(document.getElementById('reg-name')||{}).value.trim()||'';
-  const email=(document.getElementById('reg-email')||{}).value||'';
-  const pwd=(document.getElementById('reg-pwd')||{}).value||'';
+window.doRegister=async function(){
+  const name=(document.getElementById('re-name')||{}).value.trim();
+  const email=(document.getElementById('re-email')||{}).value||'';
+  const pwd=(document.getElementById('re-pwd')||{}).value||'';
   if(!email||!pwd){setAuthErr('Remplissez tous les champs.');return;}
-  if(pwd.length<6){setAuthErr('Mot de passe : 6 caractères minimum.');return;}
-  setBtnLoading('reg-btn',true);
-  setAuthErr('');
+  if(pwd.length<6){setAuthErr('Mot de passe: 6 caractères minimum.');return;}
+  setAuthErr('Création du compte…');
   try{
     const cred=await createUserWithEmailAndPassword(auth,email,pwd);
     if(name)await updateProfile(cred.user,{displayName:name});
+    setAuthErr('');
   }catch(e){
-    const msgs={'auth/email-already-in-use':'Email déjà utilisé.','auth/invalid-email':'Email invalide.','auth/weak-password':'Mot de passe trop faible.'};
-    setAuthErr(msgs[e.code]||'Erreur : '+e.message);
+    const m={'auth/email-already-in-use':'Email déjà utilisé.','auth/invalid-email':'Email invalide.','auth/weak-password':'Mot de passe trop faible.'};
+    setAuthErr(m[e.code]||'Erreur: '+e.message);
   }
-  setBtnLoading('reg-btn',false);
 };
 
-// ── Google login ──
-window.doGoogle=async function doGoogle(){
+// ── Google ──
+window.doGoogle=async function(){
   setAuthErr('');
-  try{
-    await signInWithPopup(auth,googleProvider);
-  }catch(e){
-    if(e.code!=='auth/popup-closed-by-user')setAuthErr('Erreur Google : '+e.message);
-  }
+  try{await signInWithPopup(auth,gp);}
+  catch(e){if(e.code!=='auth/popup-closed-by-user')setAuthErr('Erreur Google: '+e.message);}
 };
 
 // ── Logout ──
-window.doLogout=async function doLogout(){
+window.doLogout=async function(){
   if(!confirm('Se déconnecter ?'))return;
+  unsubs.forEach(f=>f());unsubs=[];
+  uid=null;
   await signOut(auth);
   localStorage.clear();
-  syncDot('err');
 };
 </script>
 
