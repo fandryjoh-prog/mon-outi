@@ -642,11 +642,6 @@ function gotoPage(name,btn){
 }
 function renderPage(name){
   try{
-    if(name==='hebdo'||name==='mensuel'){
-      // Render calStrip in header if element exists
-      const cs=document.getElementById('cal-'+name);
-      if(cs)renderCalIn('cal-'+name);
-    }
     if(name==='jour')renderJour();
     else if(name==='hebdo')renderHebdo();
     else if(name==='mensuel')renderMensuel();
