@@ -426,6 +426,22 @@ body{font-family:var(--ff);background:var(--bg);color:var(--text);min-height:100
   <div style="display:flex;gap:7px"><div style="width:8px;height:8px;border-radius:50%;background:#C5A880;animation:ldot 1s infinite"></div><div style="width:8px;height:8px;border-radius:50%;background:#C5A880;animation:ldot 1s infinite .2s"></div><div style="width:8px;height:8px;border-radius:50%;background:#C5A880;animation:ldot 1s infinite .4s"></div></div>
 </div>
 <style>@keyframes ldot{0%,80%,100%{transform:scale(.4);opacity:.3}40%{transform:scale(1);opacity:1}}</style>
+<script>
+window.addEventListener('error',function(e){
+  var box=document.createElement('div');
+  box.style='position:fixed;inset:0;z-index:99999;background:#fff;color:#c00;padding:20px;font-family:monospace;font-size:13px;overflow:auto;white-space:pre-wrap';
+  box.textContent='ERREUR JS:\\n'+e.message+'\\nFichier: '+e.filename+'\\nLigne: '+e.lineno+':'+e.colno+'\\n\\n'+(e.error&&e.error.stack||'');
+  document.body.appendChild(box);
+});
+setTimeout(function(){
+  var l=document.getElementById('loader');
+  if(l&&l.style.display!=='none'){
+    l.style.display='none';
+    var a=document.getElementById('auth-screen');
+    if(a)a.classList.add('show');
+  }
+},4000);
+</script>
 
 <!-- AUTH -->
 <div class="auth-screen" id="auth-screen">
