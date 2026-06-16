@@ -471,6 +471,45 @@ setTimeout(function(){
 <!-- APP WRAPPER -->
 <div class="app" id="app">
 
+<!-- SETTINGS MODAL -->
+<div class="moverlay" id="settModal" style="position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:600;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px)">
+<div class="modal" style="background:var(--card);border-radius:18px 18px 0 0;padding:18px 16px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;border-top:2px solid var(--gold)">
+  <div style="width:34px;height:4px;background:var(--bdr);border-radius:2px;margin:0 auto 14px"></div>
+  <div style="font-family:var(--ff-s);font-size:1rem;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between"><span>⚙️ Paramètres</span><button onclick="closeS()" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--t2)">✕</button></div>
+
+  <div class="msec" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--bdr)"><h3 style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin-bottom:8px">🎨 Thème</h3>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">
+      <div class="tcard" data-th="light" onclick="setTheme('light')" style="border-radius:9px;padding:8px 4px;cursor:pointer;border:2px solid transparent;text-align:center;background:var(--bg2)"><div style="font-size:.58rem;font-weight:600">☀️ Jour</div></div>
+      <div class="tcard" data-th="dark" onclick="setTheme('dark')" style="border-radius:9px;padding:8px 4px;cursor:pointer;border:2px solid transparent;text-align:center;background:var(--bg2)"><div style="font-size:.58rem;font-weight:600">🌙 Nuit</div></div>
+      <div class="tcard" data-th="neon" onclick="setTheme('neon')" style="border-radius:9px;padding:8px 4px;cursor:pointer;border:2px solid transparent;text-align:center;background:var(--bg2)"><div style="font-size:.58rem;font-weight:600">⚡ Neon</div></div>
+      <div class="tcard" data-th="solar" onclick="setTheme('solar')" style="border-radius:9px;padding:8px 4px;cursor:pointer;border:2px solid transparent;text-align:center;background:var(--bg2)"><div style="font-size:.58rem;font-weight:600">🌅 Solar</div></div>
+      <div class="tcard" data-th="warm" onclick="setTheme('warm')" style="border-radius:9px;padding:8px 4px;cursor:pointer;border:2px solid transparent;text-align:center;background:var(--bg2)"><div style="font-size:.58rem;font-weight:600">🔥 Warm</div></div>
+    </div>
+  </div>
+
+  <div class="msec" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--bdr)"><h3 style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin-bottom:8px">📋 Général</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+      <div class="sf"><label style="display:block;font-size:.62rem;font-weight:600;text-transform:uppercase;color:var(--t2);margin-bottom:4px">Nom app</label><input id="st_nm" type="text" style="width:100%;border:1.5px solid var(--bdr);border-radius:10px;padding:9px 11px;font-size:.8rem;background:var(--inp);color:var(--text)"/></div>
+      <div class="sf"><label style="display:block;font-size:.62rem;font-weight:600;text-transform:uppercase;color:var(--t2);margin-bottom:4px">Sous-titre</label><input id="st_sb" type="text" style="width:100%;border:1.5px solid var(--bdr);border-radius:10px;padding:9px 11px;font-size:.8rem;background:var(--inp);color:var(--text)"/></div>
+      <div class="sf"><label style="display:block;font-size:.62rem;font-weight:600;text-transform:uppercase;color:var(--t2);margin-bottom:4px">Budget journalier (Ar)</label><input id="st_db" type="number" style="width:100%;border:1.5px solid var(--bdr);border-radius:10px;padding:9px 11px;font-size:.8rem;background:var(--inp);color:var(--text)"/></div>
+      <div class="sf"><label style="display:block;font-size:.62rem;font-weight:600;text-transform:uppercase;color:var(--t2);margin-bottom:4px">Budget courses/mois (Ar)</label><input id="st_co" type="number" style="width:100%;border:1.5px solid var(--bdr);border-radius:10px;padding:9px 11px;font-size:.8rem;background:var(--inp);color:var(--text)"/></div>
+      <div class="sf"><label style="display:block;font-size:.62rem;font-weight:600;text-transform:uppercase;color:var(--t2);margin-bottom:4px">Épargne mensuelle (Ar)</label><input id="st_sv" type="number" style="width:100%;border:1.5px solid var(--bdr);border-radius:10px;padding:9px 11px;font-size:.8rem;background:var(--inp);color:var(--text)"/></div>
+      <div class="sf"><label style="display:block;font-size:.62rem;font-weight:600;text-transform:uppercase;color:var(--t2);margin-bottom:4px">Dîme (auto = 1/10)</label><input id="st_di" type="text" readonly style="opacity:.5;width:100%;border:1.5px solid var(--bdr);border-radius:10px;padding:9px 11px;font-size:.8rem;background:var(--inp);color:var(--text)"/></div>
+    </div>
+  </div>
+
+  <div class="msec" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--bdr)"><h3 style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin-bottom:8px">💵 Sources de revenus</h3><div id="s_inc"></div><button class="btn btno btnxs" style="margin-top:6px" onclick="addIncR()">+ Ajouter source</button></div>
+  <div class="msec" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--bdr)"><h3 style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin-bottom:8px">🏠 Charges fixes</h3><div id="s_fix"></div><button class="btn btno btnxs" style="margin-top:6px" onclick="addFixR()">+ Ajouter charge</button></div>
+  <div class="msec" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--bdr)"><h3 style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin-bottom:8px">💅 Caring mensuel</h3><div id="s_care"></div><button class="btn btno btnxs" style="margin-top:6px" onclick="addCareR()">+ Ajouter</button></div>
+  <div class="msec" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--bdr)"><h3 style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin-bottom:8px">🍸 Hebdomadaire</h3><div id="s_wk"></div><button class="btn btno btnxs" style="margin-top:6px" onclick="addWkR()">+ Ajouter</button></div>
+  <div class="msec" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--bdr)"><h3 style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin-bottom:8px">💪 Habitudes</h3><div id="s_hab"></div><button class="btn btno btnxs" style="margin-top:6px" onclick="addHabR()">+ Ajouter habitude</button></div>
+  <div class="msec" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--bdr)"><h3 style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin-bottom:8px">🌅 Mon Planning — WAKE</h3><div id="s_wake"></div></div>
+  <div class="msec" style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--bdr)"><h3 style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin-bottom:8px">💼 Mon Planning — Boulot</h3><div id="s_work"></div></div>
+  <div class="msec"><h3 style="font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t2);margin-bottom:8px">🗑 Données</h3><button class="btn btnr btnxs" onclick="resetAll()">🗑 Effacer toutes les données</button></div>
+  <button class="btn btng" style="width:100%;justify-content:center;padding:10px;margin-top:8px" onclick="saveS()">✓ Enregistrer</button>
+</div>
+</div>
+
 <!-- SIDEBAR -->
 <nav class="sidebar">
   <div class="nav-sec">
@@ -1362,108 +1401,6 @@ function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.c
 var rto;window.addEventListener('resize',function(){clearTimeout(rto);rto=setTimeout(renderAll,220)});
 
 
-// ═══ PIN SYSTEM ════════════════════════════════════════════
-var PIN_KEY     = 'vf1pin';
-var PIN_DEFAULT = '1234';
-var _pinBuf     = '';
-var _pinLocked  = true;
-
-function _getPin() {
-  var p = localStorage.getItem(PIN_KEY);
-  return (p && p.length === 4) ? p : PIN_DEFAULT;
-}
-
-function pinPress(d) {
-  if (_pinBuf.length >= 4) return;
-  _pinBuf += d;
-  _pinDots(false);
-  if (_pinBuf.length === 4) {
-    setTimeout(_pinValidate, 150);
-  }
-}
-
-function pinDel() {
-  _pinBuf = _pinBuf.slice(0, -1);
-  _pinDots(false);
-  var e = document.getElementById('pinErr');
-  if (e) e.textContent = '';
-}
-
-function _pinDots(isError) {
-  for (var i = 0; i < 4; i++) {
-    var dot = document.getElementById('pd' + i);
-    if (!dot) continue;
-    dot.className = 'pin-dot';
-    if (i < _pinBuf.length) {
-      dot.classList.add(isError ? 'error' : 'filled');
-    }
-  }
-}
-
-function _pinValidate() {
-  if (_pinBuf === _getPin()) {
-    _pinUnlock();
-  } else {
-    _pinDots(true);
-    var e = document.getElementById('pinErr');
-    if (e) e.textContent = 'Code incorrect. Réessayez.';
-    setTimeout(function() {
-      _pinBuf = '';
-      _pinDots(false);
-      var e2 = document.getElementById('pinErr');
-      if (e2) e2.textContent = '';
-    }, 900);
-  }
-}
-
-function _pinUnlock() {
-  var ov = document.getElementById('pinOverlay');
-  if (ov) {
-    ov.classList.add('hide');
-    setTimeout(function() { ov.style.display = 'none'; }, 380);
-  }
-  _pinLocked = false;
-}
-
-function pinSetFirst() {
-  _pinUnlock();
-  setTimeout(openS, 450);
-}
-
-function changePin() {
-  var n   = (document.getElementById('st_pin_new')     || {}).value || '';
-  var c   = (document.getElementById('st_pin_confirm') || {}).value || '';
-  var msg = document.getElementById('pin_msg');
-  n = n.trim(); c = c.trim();
-  function setMsg(color, txt) { if (msg) { msg.style.color = color; msg.textContent = txt; } }
-  if (!n || !c)         { setMsg('var(--R)', 'Remplissez les deux champs.'); return; }
-  if (n.length !== 4 || isNaN(Number(n))) { setMsg('var(--R)', 'Le PIN doit contenir 4 chiffres.'); return; }
-  if (n !== c)          { setMsg('var(--R)', 'Les codes ne correspondent pas.'); return; }
-  localStorage.setItem(PIN_KEY, n);
-  document.getElementById('st_pin_new').value     = '';
-  document.getElementById('st_pin_confirm').value = '';
-  setMsg('var(--G)', '✓ PIN mis à jour avec succès.');
-  setTimeout(function() { if (msg) msg.textContent = ''; }, 3000);
-}
-
-function removePin() {
-  if (!confirm('Supprimer le PIN ? Le code par défaut 1234 sera rétabli.')) return;
-  localStorage.removeItem(PIN_KEY);
-  var msg = document.getElementById('pin_msg');
-  if (msg) { msg.style.color = 'var(--G)'; msg.textContent = '✓ PIN supprimé. Code 1234 actif.'; }
-  setTimeout(function() { if (msg) msg.textContent = ''; }, 3000);
-}
-
-function initPinScreen() {
-  var ov = document.getElementById('pinOverlay');
-  if (ov) ov.style.display = 'flex';
-}
-
-document.addEventListener('keydown', function(e) {
-  if (!_pinLocked) return;
-  if (e.key >= '0' && e.key <= '9') { pinPress(e.key); }
-  else if (e.key === 'Backspace')    { pinDel(); }
-});
 
 
 // ═══ GLOBAL DATA FOR NEW FEATURES ═══
@@ -1562,7 +1499,7 @@ function renderRightPanel(){
   h+='<div class="sr" style="padding:4px 0;border-bottom:none"><span style="font-size:.72rem">Dîme</span><span class="sv" style="color:var(--P)">'+fmt(dime)+' Ar</span></div>';
   h+='<div class="pw" style="margin-top:7px;margin-bottom:0"><div class="pt"><div class="pf pf-g" style="width:'+Math.min(100,inc>0?Math.round(mr.spend/inc*100):0)+'%"></div></div></div></div>';
   h+='<div class="widget"><div class="widget-title"><span>💪 Habitudes</span><span style="color:var(--G)">'+hs.done+'/'+hs.total+'</span></div>';
-  C.habitRows.slice(0,6).forEach(function(hab){var dd=initD(k),done=!!dd.habits[hab.id];h+='<div style="display:flex;align-items:center;gap:7px;padding:4px 0;font-size:.74rem;cursor:pointer" onclick="togH(''+k+'',''+hab.id+'')"><div class="hck '+(done?'on':'')+'" style="width:17px;height:17px;font-size:.6rem;border-radius:4px">'+  (done?'✓':'')+'</div><span style="'+(done?'text-decoration:line-through;color:var(--t2)':'')+'">'+escHtml(hab.name)+'</span></div>';});
+  C.habitRows.slice(0,6).forEach(function(hab){var dd=initD(k),done=!!dd.habits[hab.id];h+='<div style="display:flex;align-items:center;gap:7px;padding:4px 0;font-size:.74rem;cursor:pointer" onclick="togH(\''+k+'\',\''+hab.id+'\')"><div class="hck '+(done?'on':'')+'" style="width:17px;height:17px;font-size:.6rem;border-radius:4px">'+  (done?'✓':'')+'</div><span style="'+(done?'text-decoration:line-through;color:var(--t2)':'')+'">'+escHtml(hab.name)+'</span></div>';});
   if(habRate!==null)h+='<div class="pw" style="margin-top:8px;margin-bottom:0"><div class="pm"><span>Taux mois</span><span>'+habRate+'%</span></div><div class="pt"><div class="pf pf-g" style="width:'+habRate+'%"></div></div></div>';
   h+='</div>';
   if(late.length){h+='<div class="widget" style="border-color:var(--R)"><div class="widget-title" style="color:var(--R)"><span>⚠️ En retard ('+late.length+')</span></div>';late.slice(0,3).forEach(function(t){h+='<div style="font-size:.72rem;padding:3px 0;color:var(--t2)">'+escHtml(t.name)+'<br><span style="color:var(--R);font-family:var(--ff-m);font-size:.6rem">'+t.due+'</span></div>';});h+='</div>';}
@@ -1613,7 +1550,7 @@ function renderGTasks(){
   h+='<div id="gtask-form" style="display:none;background:var(--card);border-radius:var(--r2);padding:14px;margin-bottom:12px;border:1px solid var(--bdr)">';
   h+='<div class="inrow"><input type="text" id="gt-name" placeholder="Titre de la tâche…"/><select id="gt-prio"><option value="haute">🔴 Haute</option><option value="moyenne" selected>🟡 Moyenne</option><option value="basse">🟢 Basse</option></select></div>';
   h+='<div class="inrow"><input type="date" id="gt-due"/><input type="text" id="gt-cat" placeholder="Catégorie"/></div>';
-  h+='<div style="display:flex;gap:6px"><button class="btn btno btnxs" onclick="document.getElementById('gtask-form').style.display='none'">Annuler</button><button class="btn btng btnxs" onclick="saveGTask()">✓ Ajouter</button></div></div>';
+  h+='<div style="display:flex;gap:6px"><button class="btn btno btnxs" onclick="document.getElementById(\'gtask-form\').style.display=\'none\'">Annuler</button><button class="btn btng btnxs" onclick="saveGTask()">✓ Ajouter</button></div></div>';
   if(!GTASKS.length){h+='<div style="text-align:center;padding:40px;color:var(--t2)"><div style="font-size:2rem">✅</div><p style="margin-top:8px;font-size:.78rem">Aucune tâche globale.</p></div>';el.innerHTML=h;return;}
   var groups={haute:[],moyenne:[],basse:[]};
   var sorted=[].concat(GTASKS).sort(function(a,b){var po={haute:0,moyenne:1,basse:2};return (po[a.prio]||1)-(po[b.prio]||1);});
@@ -1624,13 +1561,13 @@ function renderGTasks(){
     h+='<div class="ml">'+labels[prio]+'</div><div class="card" style="padding:6px 13px;margin-bottom:10px">';
     groups[prio].forEach(function(t){
       var late=t.due&&!t.done&&t.due<key(cy,cm,cd);
-      h+='<div class="titem"><div class="tchk '+(t.done?'on':'')+'" onclick="togGTask(''+t.id+'')"></div>';
+      h+='<div class="titem"><div class="tchk '+(t.done?'on':'')+'" onclick="togGTask(\'+t.id+\')"></div>';
       h+='<div class="tbody"><div class="tname '+(t.done?'dn':'')+'">'+escHtml(t.name)+'</div>';
       h+='<div class="tmeta">';
       if(t.prio)h+='<span class="ttag '+(t.prio==='haute'?'tu':t.prio==='basse'?'tp':'tw')+'">'+t.prio+'</span>';
       if(t.cat)h+='<span class="ttag tb2">'+escHtml(t.cat)+'</span>';
       if(t.due)h+='<span style="font-size:.6rem;color:'+(late?'var(--R)':'var(--t3)')+'">📅 '+t.due+(late?' ⚠️':'')+'</span>';
-      h+='</div></div><button class="btn btno btnxs" onclick="delGTask(''+t.id+'')">✕</button></div>';
+      h+='</div></div><button class="btn btno btnxs" onclick="delGTask(\'+t.id+\')">✕</button></div>';
     });
     h+='</div>';
   });
@@ -1656,11 +1593,11 @@ function renderObjectifs(){
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
   OBJECTIFS.forEach(function(obj){
     var pct=obj.target>0?Math.min(100,Math.round((obj.current/obj.target)*100)):0;
-    h+='<div class="obj-card"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-family:var(--ff-s);font-size:.88rem">'+escHtml(obj.name)+'<br><span class="badge bdg-g" style="display:inline-flex;margin-top:3px">'+obj.cat+'</span></div><button class="btn btnr btnxs" onclick="delObj(''+obj.id+'')">🗑</button></div>';
+    h+='<div class="obj-card"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-family:var(--ff-s);font-size:.88rem">'+escHtml(obj.name)+'<br><span class="badge bdg-g" style="display:inline-flex;margin-top:3px">'+obj.cat+'</span></div><button class="btn btnr btnxs" onclick="delObj(\'+obj.id+\')">🗑</button></div>';
     h+='<div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:.68rem;color:var(--t2)">'+fmt(obj.current||0)+' / '+fmt(obj.target)+' '+(obj.unit||'')+'</span><span style="font-family:var(--ff-m);color:var(--gold);font-size:.8rem">'+pct+'%</span></div>';
     h+='<div class="pt"><div class="pf pf-G" style="width:'+pct+'%"></div></div>';
     if(obj.due)h+='<div style="font-size:.62rem;color:var(--t3);margin-top:4px">📅 '+obj.due+'</div>';
-    h+='<div style="display:flex;gap:5px;margin-top:8px"><input type="number" class="ftxt" style="flex:1" placeholder="Valeur actuelle" value="'+(obj.current||0)+'" onchange="updObj(''+obj.id+'',this.value)"/><button class="btn btng btnxs" onclick="persistObj()">✓</button></div></div>';
+    h+='<div style="display:flex;gap:5px;margin-top:8px"><input type="number" class="ftxt" style="flex:1" placeholder="Valeur actuelle" value="'+(obj.current||0)+'" onchange="updObj(\'+obj.id+\',this.value)"/><button class="btn btng btnxs" onclick="persistObj()">✓</button></div></div>';
   });
   h+='</div>';el.innerHTML=h;
 }
@@ -1688,11 +1625,11 @@ function renderBienetre(){
   var h='<div class="ph"><div class="ph-row"><div class="ph-title">💪 <em>Bien-être</em></div><div class="ph-sub">'+cd+' '+MN[cm]+'</div></div></div>';
   h+='<div class="krow k4"><div class="kpi"><div class="kv">'+(b.mood||'—')+'</div><div class="kk">Humeur</div></div><div class="kpi kb"><div class="kv">'+(b.sleep||0)+'h</div><div class="kk">Sommeil</div></div><div class="kpi kg"><div class="kv">'+(b.water||0)+'</div><div class="kk">Verres eau</div></div><div class="kpi kp"><div class="kv">'+(b.sport||0)+'min</div><div class="kk">Sport</div></div></div>';
   h+='<div class="card l-G"><div class="ctop"><div class="ctitle"><span class="ci ci-G">😊</span>Saisie du jour</div></div>';
-  h+='<div class="ml">Humeur</div><div class="mood-grid">'+['😊','😐','😔','😤','😴','🤒','🎉','💪'].map(function(m){return '<button class="mood-btn '+(b.mood===m?'sel':'')+'" onclick="setBienetre('mood',''+m+'')">'+m+'</button>';}).join('')+'</div>';
+  h+='<div class="ml">Humeur</div><div class="mood-grid">'+['😊','😐','😔','😤','😴','🤒','🎉','💪'].map(function(m){return '<button class="mood-btn '+(b.mood===m?'sel':'')+'" onclick="setBienetre(\'mood\',\'+m+\')">'+m+'</button>';}).join('')+'</div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px">';
-  h+='<div class="sf"><label>Sommeil (h)</label><input type="number" class="txtin" min="0" max="24" step="0.5" value="'+(b.sleep||'')+'" placeholder="0" onchange="setBienetre('sleep',this.value)"/></div>';
-  h+='<div class="sf"><label>Eau (verres)</label><input type="number" class="txtin" min="0" value="'+(b.water||'')+'" placeholder="0" onchange="setBienetre('water',this.value)"/></div>';
-  h+='<div class="sf"><label>Sport (min)</label><input type="number" class="txtin" min="0" value="'+(b.sport||'')+'" placeholder="0" onchange="setBienetre('sport',this.value)"/></div>';
+  h+='<div class="sf"><label>Sommeil (h)</label><input type="number" class="txtin" min="0" max="24" step="0.5" value="'+(b.sleep||'')+'" placeholder="0" onchange="setBienetre(\'sleep\',this.value)"/></div>';
+  h+='<div class="sf"><label>Eau (verres)</label><input type="number" class="txtin" min="0" value="'+(b.water||'')+'" placeholder="0" onchange="setBienetre(\'water\',this.value)"/></div>';
+  h+='<div class="sf"><label>Sport (min)</label><input type="number" class="txtin" min="0" value="'+(b.sport||'')+'" placeholder="0" onchange="setBienetre(\'sport\',this.value)"/></div>';
   h+='</div></div>';el.innerHTML=h;
 }
 function setBienetre(k2,v){var ds=key(cy,cm,cd);if(!BIENETRE[ds])BIENETRE[ds]={};BIENETRE[ds][k2]=typeof v==='string'&&v.length<=4?v:(parseFloat(v)||0);fbSaveAll();}
@@ -1710,7 +1647,7 @@ function renderPlanning(){
   h+='<button class="btn btng btnxs" onclick="saveEvent()">+ Ajouter</button></div>';
   h+='<div class="card"><div class="ctop"><div class="ctitle"><span class="ci ci-B">📅</span>Événements à venir</div></div>';
   if(!upcoming.length)h+='<div style="text-align:center;padding:20px;color:var(--t2);font-size:.78rem">Aucun événement.</div>';
-  upcoming.forEach(function(ev){var col=colors[ev.type]||'var(--B)';var ds=(ev.date||todayStr).replace(/-/g,'');var gcUrl='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(ev.name||'')+'&dates='+ds+'T'+((ev.start||'08:00').replace(':',''))+'00/'+ds+'T'+((ev.end||'09:00').replace(':',''))+'00';h+='<div class="event-block"><div class="event-ico" style="background:'+col+'22;color:'+col+'">'+(icons[ev.type]||'📌')+'</div><div class="event-body"><div class="event-name">'+escHtml(ev.name)+'</div><div class="event-time">📅 '+ev.date+(ev.start?' · '+ev.start+(ev.end?' – '+ev.end:''):'')+'</div></div><a href="'+gcUrl+'" target="_blank" class="gcal-btn">📅 GCal</a><button class="btn btno btnxs" onclick="delEvent(''+ev.id+'')">✕</button></div>';});
+  upcoming.forEach(function(ev){var col=colors[ev.type]||'var(--B)';var ds=(ev.date||todayStr).replace(/-/g,'');var gcUrl='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(ev.name||'')+'&dates='+ds+'T'+((ev.start||'08:00').replace(':',''))+'00/'+ds+'T'+((ev.end||'09:00').replace(':',''))+'00';h+='<div class="event-block"><div class="event-ico" style="background:'+col+'22;color:'+col+'">'+(icons[ev.type]||'📌')+'</div><div class="event-body"><div class="event-name">'+escHtml(ev.name)+'</div><div class="event-time">📅 '+ev.date+(ev.start?' · '+ev.start+(ev.end?' – '+ev.end:''):'')+'</div></div><a href="'+gcUrl+'" target="_blank" class="gcal-btn">📅 GCal</a><button class="btn btno btnxs" onclick="delEvent(\'+ev.id+\')">✕</button></div>';});
   h+='</div>';
   h+='<div style="margin-top:12px"><a href="https://calendar.google.com" target="_blank" class="gcal-btn" style="width:100%;justify-content:center;display:flex">🗓 Ouvrir Google Calendar</a></div>';
   el.innerHTML=h;
@@ -1731,20 +1668,6 @@ function updWake(i,k2,v){if(!C.wakeRows)C.wakeRows=JSON.parse(JSON.stringify(DEF
 function updWork(i,j,k2,v){if(!C.workRows)C.workRows=JSON.parse(JSON.stringify(DEFAULT_WORK));if(C.workRows[i]&&C.workRows[i].slots[j])C.workRows[i].slots[j][k2]=v;persistC();}
 function addWorkSlot(i){if(!C.workRows)C.workRows=JSON.parse(JSON.stringify(DEFAULT_WORK));if(C.workRows[i])C.workRows[i].slots.push({t:'',p:'',c:'a'});persistC();openS();}
 function rmWorkSlot(i,j){if(!C.workRows)C.workRows=JSON.parse(JSON.stringify(DEFAULT_WORK));if(C.workRows[i])C.workRows[i].slots.splice(j,1);persistC();openS();}
-
-function tick(){
-  var now=new Date();
-  var hh=now.getHours(),mm=now.getMinutes();
-  var ct=document.getElementById('clockDisp');if(ct)ct.textContent=p2(hh)+':'+p2(mm);
-  var start=6*60,end=23*60,cur=hh*60+mm;
-  var pct=Math.min(100,Math.max(0,Math.round(((cur-start)/(end-start))*100)));
-  var C2=75.4;
-  var ring=document.getElementById('clockRing');if(ring)ring.style.strokeDashoffset=(C2-(C2*pct/100)).toFixed(2);
-  var cp=document.getElementById('clockPct');if(cp)cp.textContent=pct+'%';
-  var cs2=document.getElementById('clockSub');if(cs2)cs2.textContent='Journée '+pct+'%';
-  var df=document.getElementById('dtFill');if(df)df.style.width=pct+'%';
-  var dp=document.getElementById('dtPct');if(dp)dp.textContent=pct+'%';
-}
 
 // Init called by Firebase after login
 function appStart(user){
