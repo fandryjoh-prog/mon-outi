@@ -455,14 +455,14 @@ setTimeout(function(){
     <div id="af-login" class="auth-form">
       <input type="email" id="li-email" placeholder="Email"/>
       <input type="password" id="li-pwd" placeholder="Mot de passe"/>
-      <button class="auth-btn primary" onclick="doLogin()">Se connecter</button>
-      <button class="auth-btn google" onclick="doGoogle()">🌐 Continuer avec Google</button>
+      <button class="auth-btn primary" id="btn-login">Se connecter</button>
+      <button class="auth-btn google" id="btn-google">🌐 Continuer avec Google</button>
     </div>
     <div id="af-reg" class="auth-form" style="display:none">
       <input type="text" id="re-name" placeholder="Prénom"/>
       <input type="email" id="re-email" placeholder="Email"/>
       <input type="password" id="re-pwd" placeholder="Mot de passe (min. 6 car.)"/>
-      <button class="auth-btn primary" onclick="doRegister()">Créer mon compte</button>
+      <button class="auth-btn primary" id="btn-register">Créer mon compte</button>
     </div>
     <div class="auth-err" id="auth-err"></div>
   </div>
@@ -536,7 +536,7 @@ setTimeout(function(){
     <div class="nav-lbl">Compte</div>
     <div class="nav-item" onclick="openS()"><span class="nav-ico">⚙️</span>Paramètres</div>
     <div class="nav-item" id="nav-admin" style="display:none" onclick="gotoSide('admin',this)"><span class="nav-ico">👑</span>Admin <span class="admin-crown">ADMIN</span></div>
-    <div class="nav-item" onclick="doLogout()"><span class="nav-ico">🚪</span>Déconnexion</div>
+    <div class="nav-item" id="btn-logout"><span class="nav-ico">🚪</span>Déconnexion</div>
   </div>
 </nav>
 
@@ -1691,10 +1691,7 @@ function appStart(user){
 function setAuthErr(m){var e=document.getElementById('auth-err');if(e)e.textContent=m;}
 
 // Auth stubs - overridden by Firebase module when loaded
-function doLogin(){setAuthErr('Chargement Firebase...');setTimeout(function(){if(window.doLogin&&window.doLogin!==doLogin){window.doLogin();}else{setAuthErr('Erreur de connexion Firebase. Rechargez la page.');}},2000);}
-function doRegister(){setAuthErr('Chargement...');setTimeout(function(){if(window.doRegister&&window.doRegister!==doRegister)window.doRegister();},2000);}
-function doGoogle(){setAuthErr('Chargement...');setTimeout(function(){if(window.doGoogle&&window.doGoogle!==doGoogle)window.doGoogle();},2000);}
-function doLogout(){if(window.doLogout&&window.doLogout!==doLogout){window.doLogout();}else{location.reload();}}
+// Auth handled by Firebase module event listeners
 
 window._fbUID=null;
 window.fbSaveReal=null;
@@ -1765,10 +1762,50 @@ onAuthStateChanged(auth,async function(user){
     syncDotFn('err');
   }
 });
-window.doLogin=async function(){var email=(document.getElementById('li-email')||{}).value||'',pwd=(document.getElementById('li-pwd')||{}).value||'';if(!email||!pwd){setAuthErr('Remplissez tous les champs.');return;}setAuthErr('Connexion…');try{await signInWithEmailAndPassword(auth,email,pwd);setAuthErr('');}catch(e){var m={'auth/wrong-password':'Mot de passe incorrect.','auth/user-not-found':'Compte introuvable.','auth/invalid-credential':'Email ou mot de passe incorrect.'};setAuthErr(m[e.code]||'Erreur: '+e.message);}};
-window.doRegister=async function(){var name=(document.getElementById('re-name')||{}).value||'',email=(document.getElementById('re-email')||{}).value||'',pwd=(document.getElementById('re-pwd')||{}).value||'';if(!email||!pwd){setAuthErr('Remplissez tous les champs.');return;}if(pwd.length<6){setAuthErr('Minimum 6 caractères.');return;}setAuthErr('Création…');try{var c=await createUserWithEmailAndPassword(auth,email,pwd);if(name.trim())await updateProfile(c.user,{displayName:name.trim()});setAuthErr('');}catch(e){var m={'auth/email-already-in-use':'Email déjà utilisé.'};setAuthErr(m[e.code]||'Erreur: '+e.message);}};
-window.doGoogle=async function(){setAuthErr('');try{await signInWithPopup(auth,gp);}catch(e){if(e.code!=='auth/popup-closed-by-user')setAuthErr('Erreur Google: '+e.message);}};
-window.doLogout=async function(){if(!confirm('Se déconnecter ?'))return;window._fbUID=null;if(unsub)unsub();await signOut(auth);localStorage.removeItem('ve_th');};
+// Bind auth buttons via addEventListener (avoids global function timing issues)
+var btnLogin=document.getElementById('btn-login');
+if(btnLogin) btnLogin.addEventListener('click',async function(){
+  var email=(document.getElementById('li-email')||{}).value||'';
+  var pwd=(document.getElementById('li-pwd')||{}).value||'';
+  if(!email||!pwd){setAuthErr('Remplissez tous les champs.');return;}
+  setAuthErr('Connexion…');
+  try{await signInWithEmailAndPassword(auth,email,pwd);setAuthErr('');}
+  catch(e){var m={'auth/wrong-password':'Mot de passe incorrect.','auth/user-not-found':'Compte introuvable.','auth/invalid-credential':'Email ou mot de passe incorrect.','auth/invalid-email':'Email invalide.'};setAuthErr(m[e.code]||e.message);}
+});
+
+var btnReg=document.getElementById('btn-register');
+if(btnReg) btnReg.addEventListener('click',async function(){
+  var name=(document.getElementById('re-name')||{}).value||'';
+  var email=(document.getElementById('re-email')||{}).value||'';
+  var pwd=(document.getElementById('re-pwd')||{}).value||'';
+  if(!email||!pwd){setAuthErr('Remplissez tous les champs.');return;}
+  if(pwd.length<6){setAuthErr('Minimum 6 caractères.');return;}
+  setAuthErr('Création…');
+  try{var c=await createUserWithEmailAndPassword(auth,email,pwd);if(name.trim())await updateProfile(c.user,{displayName:name.trim()});setAuthErr('');}
+  catch(e){var m={'auth/email-already-in-use':'Email déjà utilisé.','auth/invalid-email':'Email invalide.'};setAuthErr(m[e.code]||e.message);}
+});
+
+var btnGoogle=document.getElementById('btn-google');
+if(btnGoogle) btnGoogle.addEventListener('click',async function(){
+  setAuthErr('');
+  try{await signInWithPopup(auth,gp);}
+  catch(e){if(e.code!=='auth/popup-closed-by-user')setAuthErr('Erreur Google: '+e.message);}
+});
+
+// Bind all logout buttons
+document.querySelectorAll('#btn-logout').forEach(function(btn){
+  btn.addEventListener('click',async function(){
+    if(!confirm('Se déconnecter ?'))return;
+    window._fbUID=null;if(unsub)unsub();
+    await signOut(auth);localStorage.removeItem('ve_th');
+  });
+});
+
+// Also expose as globals for any remaining onclick references
+window.doLogin=function(){document.getElementById('btn-login')&&document.getElementById('btn-login').click();};
+window.doRegister=function(){document.getElementById('btn-register')&&document.getElementById('btn-register').click();};
+window.doGoogle=function(){document.getElementById('btn-google')&&document.getElementById('btn-google').click();};
+window.doLogout=function(){document.getElementById('btn-logout')&&document.getElementById('btn-logout').click();};
 </script>
 </body>
 </html>
