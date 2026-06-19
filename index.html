@@ -651,6 +651,7 @@ const WAKE={
 const DN=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
 const DNF=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
 const MN=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const MNS=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
 
 // ═══ STATE ═══
 let cy,cm,cd;
@@ -1688,6 +1689,13 @@ function appStart(user){
 
 <script>
 function setAuthErr(m){var e=document.getElementById('auth-err');if(e)e.textContent=m;}
+
+// Auth stubs - overridden by Firebase module when loaded
+function doLogin(){setAuthErr('Chargement Firebase...');setTimeout(function(){if(window.doLogin&&window.doLogin!==doLogin){window.doLogin();}else{setAuthErr('Erreur de connexion Firebase. Rechargez la page.');}},2000);}
+function doRegister(){setAuthErr('Chargement...');setTimeout(function(){if(window.doRegister&&window.doRegister!==doRegister)window.doRegister();},2000);}
+function doGoogle(){setAuthErr('Chargement...');setTimeout(function(){if(window.doGoogle&&window.doGoogle!==doGoogle)window.doGoogle();},2000);}
+function doLogout(){if(window.doLogout&&window.doLogout!==doLogout){window.doLogout();}else{location.reload();}}
+
 window._fbUID=null;
 window.fbSaveReal=null;
 </script>
