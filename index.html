@@ -455,14 +455,14 @@ setTimeout(function(){
     <div id="af-login" class="auth-form">
       <input type="email" id="li-email" placeholder="Email"/>
       <input type="password" id="li-pwd" placeholder="Mot de passe"/>
-      <button class="auth-btn primary" id="btn-login">Se connecter</button>
-      <button class="auth-btn google" id="btn-google">🌐 Continuer avec Google</button>
+      <button class="auth-btn primary" onclick="doLogin()">Se connecter</button>
+      <button class="auth-btn google" onclick="doGoogle()">🌐 Continuer avec Google</button>
     </div>
     <div id="af-reg" class="auth-form" style="display:none">
       <input type="text" id="re-name" placeholder="Prénom"/>
       <input type="email" id="re-email" placeholder="Email"/>
       <input type="password" id="re-pwd" placeholder="Mot de passe (min. 6 car.)"/>
-      <button class="auth-btn primary" id="btn-register">Créer mon compte</button>
+      <button class="auth-btn primary" onclick="doRegister()">Créer mon compte</button>
     </div>
     <div class="auth-err" id="auth-err"></div>
   </div>
@@ -536,7 +536,7 @@ setTimeout(function(){
     <div class="nav-lbl">Compte</div>
     <div class="nav-item" onclick="openS()"><span class="nav-ico">⚙️</span>Paramètres</div>
     <div class="nav-item" id="nav-admin" style="display:none" onclick="gotoSide('admin',this)"><span class="nav-ico">👑</span>Admin <span class="admin-crown">ADMIN</span></div>
-    <div class="nav-item" id="btn-logout"><span class="nav-ico">🚪</span>Déconnexion</div>
+    <div class="nav-item" onclick="doLogout()"><span class="nav-ico">🚪</span>Déconnexion</div>
   </div>
 </nav>
 
@@ -1687,125 +1687,131 @@ function appStart(user){
 }
 </script>
 
+<!-- Firebase replaced by compat SDK -->
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
+var _fcfg={apiKey:"AIzaSyAdfIiIMRevlNcyNhueJq2fzRdD53XBT1I",authDomain:"mon-outil-budget.firebaseapp.com",projectId:"mon-outil-budget",storageBucket:"mon-outil-budget.firebasestorage.app",messagingSenderId:"528991480334",appId:"1:528991480334:web:2bf07bf807e2f9c148aa5f"};
+firebase.initializeApp(_fcfg);
+var _auth=firebase.auth();
+var _db=firebase.firestore();
+var _unsub=null;
+
 function setAuthErr(m){var e=document.getElementById('auth-err');if(e)e.textContent=m;}
+function syncDotFn(s){var d=document.getElementById('syncDot');if(d)d.style.background=s==='ok'?'var(--G)':s==='sync'?'var(--gold)':'var(--R)';}
 
-// Auth stubs - overridden by Firebase module when loaded
-// Auth handled by Firebase module event listeners
-
-window._fbUID=null;
-window.fbSaveReal=null;
-</script>
-<script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import{getFirestore,doc,setDoc,getDoc,onSnapshot}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,updateProfile}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-var fcfg={apiKey:"AIzaSyAdfIiIMRevlNcyNhueJq2fzRdD53XBT1I",authDomain:"mon-outil-budget.firebaseapp.com",projectId:"mon-outil-budget",storageBucket:"mon-outil-budget.firebasestorage.app",messagingSenderId:"528991480334",appId:"1:528991480334:web:2bf07bf807e2f9c148aa5f"};
-var app=initializeApp(fcfg),db=getFirestore(app),auth=getAuth(app),gp=new GoogleAuthProvider(),unsub=null;
-window._fbUID=null;
-window.fbSaveReal=async function(){
+window.fbSaveReal=function(){
   if(!window._fbUID)return;
   syncDotFn('sync');
   var payload={AD:AD,INC:INC,C:C,JOURNAL:JOURNAL,OBJECTIFS:OBJECTIFS,BIENETRE:BIENETRE,EVENTS:EVENTS,GTASKS:GTASKS,ts:Date.now()};
-  try{await setDoc(doc(db,'users',window._fbUID,'data','main'),{j:JSON.stringify(payload)});syncDotFn('ok');}
-  catch(e){syncDotFn('err');console.error(e);}
+  _db.collection('users').doc(window._fbUID).collection('data').doc('main')
+    .set({j:JSON.stringify(payload)})
+    .then(function(){syncDotFn('ok');})
+    .catch(function(e){syncDotFn('err');console.error(e);});
 };
-async function loadUser(user){
+
+function _loadUser(user){
   window._fbUID=user.uid;
   Object.keys(AD).forEach(function(k){delete AD[k];});
   Object.keys(INC).forEach(function(k){delete INC[k];});
   JOURNAL={};OBJECTIFS.length=0;BIENETRE={};EVENTS.length=0;GTASKS.length=0;
-  try{
-    var s=await getDoc(doc(db,'users',window._fbUID,'data','main'));
-    if(s.exists()){
-      var r=JSON.parse(s.data().j||'{}');
-      if(r.AD)Object.assign(AD,r.AD);
-      if(r.INC)Object.assign(INC,r.INC);
-      if(r.C)Object.assign(C,r.C);
-      if(r.JOURNAL)Object.assign(JOURNAL,r.JOURNAL);
-      if(r.OBJECTIFS&&Array.isArray(r.OBJECTIFS))r.OBJECTIFS.forEach(function(o){OBJECTIFS.push(o);});
-      if(r.BIENETRE)Object.assign(BIENETRE,r.BIENETRE);
-      if(r.EVENTS&&Array.isArray(r.EVENTS))r.EVENTS.forEach(function(e){EVENTS.push(e);});
-      if(r.GTASKS&&Array.isArray(r.GTASKS))r.GTASKS.forEach(function(t){GTASKS.push(t);});
-    }
-  }catch(e){console.warn('loadUser:',e);}
-  if(unsub)unsub();
-  unsub=onSnapshot(doc(db,'users',window._fbUID,'data','main'),function(snap){
-    if(!snap.exists())return;
-    try{
-      var r=JSON.parse(snap.data().j||'{}');
-      if(r.AD){Object.keys(AD).forEach(function(k){delete AD[k];});Object.assign(AD,r.AD);}
-      if(r.INC){Object.keys(INC).forEach(function(k){delete INC[k];});Object.assign(INC,r.INC);}
-      if(r.C)Object.assign(C,r.C);
-      if(r.JOURNAL){Object.keys(JOURNAL).forEach(function(k){delete JOURNAL[k];});Object.assign(JOURNAL,r.JOURNAL);}
-      if(r.OBJECTIFS&&Array.isArray(r.OBJECTIFS)){OBJECTIFS.length=0;r.OBJECTIFS.forEach(function(o){OBJECTIFS.push(o);});}
-      if(r.BIENETRE){Object.keys(BIENETRE).forEach(function(k){delete BIENETRE[k];});Object.assign(BIENETRE,r.BIENETRE);}
-      if(r.EVENTS&&Array.isArray(r.EVENTS)){EVENTS.length=0;r.EVENTS.forEach(function(e){EVENTS.push(e);});}
-      if(r.GTASKS&&Array.isArray(r.GTASKS)){GTASKS.length=0;r.GTASKS.forEach(function(t){GTASKS.push(t);});}
-      if(typeof renderAll==='function')renderAll();
+
+  _db.collection('users').doc(window._fbUID).collection('data').doc('main').get()
+    .then(function(s){
+      if(s.exists){
+        var r=JSON.parse(s.data().j||'{}');
+        if(r.AD)Object.assign(AD,r.AD);
+        if(r.INC)Object.assign(INC,r.INC);
+        if(r.C)Object.assign(C,r.C);
+        if(r.JOURNAL)Object.assign(JOURNAL,r.JOURNAL);
+        if(r.OBJECTIFS&&Array.isArray(r.OBJECTIFS))r.OBJECTIFS.forEach(function(o){OBJECTIFS.push(o);});
+        if(r.BIENETRE)Object.assign(BIENETRE,r.BIENETRE);
+        if(r.EVENTS&&Array.isArray(r.EVENTS))r.EVENTS.forEach(function(e){EVENTS.push(e);});
+        if(r.GTASKS&&Array.isArray(r.GTASKS))r.GTASKS.forEach(function(t){GTASKS.push(t);});
+      }
+      document.getElementById('loader').style.display='none';
+      document.getElementById('auth-screen').classList.remove('show');
+      document.getElementById('app').classList.add('show');
+      if(typeof appStart==='function')appStart(user);
       syncDotFn('ok');
-    }catch(e){}
-  });
+      if(_unsub)_unsub();
+      _unsub=_db.collection('users').doc(window._fbUID).collection('data').doc('main')
+        .onSnapshot(function(snap){
+          if(!snap.exists)return;
+          try{
+            var r=JSON.parse(snap.data().j||'{}');
+            if(r.AD){Object.keys(AD).forEach(function(k){delete AD[k];});Object.assign(AD,r.AD);}
+            if(r.INC){Object.keys(INC).forEach(function(k){delete INC[k];});Object.assign(INC,r.INC);}
+            if(r.C)Object.assign(C,r.C);
+            if(r.JOURNAL){Object.keys(JOURNAL).forEach(function(k){delete JOURNAL[k];});Object.assign(JOURNAL,r.JOURNAL);}
+            if(r.OBJECTIFS&&Array.isArray(r.OBJECTIFS)){OBJECTIFS.length=0;r.OBJECTIFS.forEach(function(o){OBJECTIFS.push(o);});}
+            if(r.BIENETRE){Object.keys(BIENETRE).forEach(function(k){delete BIENETRE[k];});Object.assign(BIENETRE,r.BIENETRE);}
+            if(r.EVENTS&&Array.isArray(r.EVENTS)){EVENTS.length=0;r.EVENTS.forEach(function(e){EVENTS.push(e);});}
+            if(r.GTASKS&&Array.isArray(r.GTASKS)){GTASKS.length=0;r.GTASKS.forEach(function(t){GTASKS.push(t);});}
+            if(typeof renderAll==='function')renderAll();
+            syncDotFn('ok');
+          }catch(e){}
+        });
+    })
+    .catch(function(e){console.error('loadUser:',e);document.getElementById('loader').style.display='none';document.getElementById('auth-screen').classList.add('show');});
 }
-onAuthStateChanged(auth,async function(user){
-  document.getElementById('loader').style.display='none';
+
+_auth.onAuthStateChanged(function(user){
   if(user){
-    document.getElementById('auth-screen').classList.remove('show');
-    await loadUser(user);
-    document.getElementById('app').classList.add('show');
-    if(typeof appStart==='function')appStart(user);
-    syncDotFn('ok');
+    _loadUser(user);
   }else{
-    window._fbUID=null;if(unsub)unsub();
+    window._fbUID=null;if(_unsub)_unsub();
+    document.getElementById('loader').style.display='none';
     document.getElementById('app').classList.remove('show');
     document.getElementById('auth-screen').classList.add('show');
     syncDotFn('err');
   }
 });
-// Bind auth buttons via addEventListener (avoids global function timing issues)
-var btnLogin=document.getElementById('btn-login');
-if(btnLogin) btnLogin.addEventListener('click',async function(){
+
+function doLogin(){
   var email=(document.getElementById('li-email')||{}).value||'';
   var pwd=(document.getElementById('li-pwd')||{}).value||'';
   if(!email||!pwd){setAuthErr('Remplissez tous les champs.');return;}
   setAuthErr('Connexion…');
-  try{await signInWithEmailAndPassword(auth,email,pwd);setAuthErr('');}
-  catch(e){var m={'auth/wrong-password':'Mot de passe incorrect.','auth/user-not-found':'Compte introuvable.','auth/invalid-credential':'Email ou mot de passe incorrect.','auth/invalid-email':'Email invalide.'};setAuthErr(m[e.code]||e.message);}
-});
+  _auth.signInWithEmailAndPassword(email,pwd)
+    .then(function(){setAuthErr('');})
+    .catch(function(e){
+      var m={'auth/wrong-password':'Mot de passe incorrect.','auth/user-not-found':'Compte introuvable.','auth/invalid-credential':'Email ou mot de passe incorrect.','auth/invalid-email':'Email invalide.'};
+      setAuthErr(m[e.code]||e.message);
+    });
+}
 
-var btnReg=document.getElementById('btn-register');
-if(btnReg) btnReg.addEventListener('click',async function(){
+function doRegister(){
   var name=(document.getElementById('re-name')||{}).value||'';
   var email=(document.getElementById('re-email')||{}).value||'';
   var pwd=(document.getElementById('re-pwd')||{}).value||'';
   if(!email||!pwd){setAuthErr('Remplissez tous les champs.');return;}
   if(pwd.length<6){setAuthErr('Minimum 6 caractères.');return;}
   setAuthErr('Création…');
-  try{var c=await createUserWithEmailAndPassword(auth,email,pwd);if(name.trim())await updateProfile(c.user,{displayName:name.trim()});setAuthErr('');}
-  catch(e){var m={'auth/email-already-in-use':'Email déjà utilisé.','auth/invalid-email':'Email invalide.'};setAuthErr(m[e.code]||e.message);}
-});
+  _auth.createUserWithEmailAndPassword(email,pwd)
+    .then(function(c){if(name.trim())return c.user.updateProfile({displayName:name.trim()});})
+    .then(function(){setAuthErr('');})
+    .catch(function(e){
+      var m={'auth/email-already-in-use':'Email déjà utilisé.','auth/invalid-email':'Email invalide.'};
+      setAuthErr(m[e.code]||e.message);
+    });
+}
 
-var btnGoogle=document.getElementById('btn-google');
-if(btnGoogle) btnGoogle.addEventListener('click',async function(){
+function doGoogle(){
   setAuthErr('');
-  try{await signInWithPopup(auth,gp);}
-  catch(e){if(e.code!=='auth/popup-closed-by-user')setAuthErr('Erreur Google: '+e.message);}
-});
+  var provider=new firebase.auth.GoogleAuthProvider();
+  _auth.signInWithPopup(provider)
+    .catch(function(e){if(e.code!=='auth/popup-closed-by-user')setAuthErr('Erreur Google: '+e.message);});
+}
 
-// Bind all logout buttons
-document.querySelectorAll('#btn-logout').forEach(function(btn){
-  btn.addEventListener('click',async function(){
-    if(!confirm('Se déconnecter ?'))return;
-    window._fbUID=null;if(unsub)unsub();
-    await signOut(auth);localStorage.removeItem('ve_th');
-  });
-});
-
-// Also expose as globals for any remaining onclick references
-window.doLogin=function(){document.getElementById('btn-login')&&document.getElementById('btn-login').click();};
-window.doRegister=function(){document.getElementById('btn-register')&&document.getElementById('btn-register').click();};
-window.doGoogle=function(){document.getElementById('btn-google')&&document.getElementById('btn-google').click();};
-window.doLogout=function(){document.getElementById('btn-logout')&&document.getElementById('btn-logout').click();};
+function doLogout(){
+  if(!confirm('Se déconnecter ?'))return;
+  window._fbUID=null;if(_unsub)_unsub();
+  _auth.signOut().then(function(){localStorage.removeItem('ve_th');});
+}
 </script>
+
 </body>
 </html>
