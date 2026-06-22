@@ -1299,125 +1299,197 @@
             State.C[field][idx] = val;
             triggerSave();
         }
-        /* ============ CONSEIL BUDGETAIRE PERSONNALISE ============ */
-        function gatherBudgetData() {
-            ensureC(); ensureG();
-            var months = [];
+        /* ============ CONSEIL BUDGETAIRE — 100% ALGORITHMIQUE ============ */
+
+        /* ---- Calculs statistiques ---- */
+        function calcEMA(values, alpha) {
+            // EMA = Exponential Moving Average
+            if (!values.length) return 0;
+            var ema = values[0];
+            for (var i = 1; i < values.length; i++) ema = alpha * values[i] + (1 - alpha) * ema;
+            return ema;
+        }
+        function calcLinearTrend(values) {
+            // Renvoie la pente (montant de variation par période)
+            var n = values.length;
+            if (n < 2) return 0;
+            var sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+            for (var i = 0; i < n; i++) { sumX += i; sumY += values[i]; sumXY += i * values[i]; sumX2 += i * i; }
+            var denom = n * sumX2 - sumX * sumX;
+            return denom === 0 ? 0 : (n * sumXY - sumX * sumY) / denom;
+        }
+        function prevision(values, alpha) {
+            // Formule : 0.7 × EMA(alpha) + 0.3 × (derniere_val + tendance)
+            if (!values.length) return 0;
+            var ema = calcEMA(values, alpha);
+            var trend = calcLinearTrend(values);
+            var lastVal = values[values.length - 1];
+            return Math.round(0.7 * ema + 0.3 * (lastVal + trend));
+        }
+
+        /* ---- Collecte des 6 derniers mois ---- */
+        function getHistorique6Mois() {
+            var mois = [];
             for (var i = 5; i >= 0; i--) {
                 var d = new Date(State.activeDate.getFullYear(), State.activeDate.getMonth() - i, 1);
                 var mk2 = getMonthKey(d);
-                var inc2 = incomeTotalForMonth(mk2);
-                var spend2 = spentTotalForMonth(mk2);
-                var cSpend2 = coursesSpentForMonth(mk2);
-                months.push({
-                    mois: mk2,
-                    revenus: inc2,
-                    depenses_quotidiennes: spend2,
-                    depenses_courses: cSpend2,
-                    depenses_totales: spend2 + cSpend2
+                var dim = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+                mois.push({
+                    label: MSHORT[d.getMonth()] + ' ' + d.getFullYear(),
+                    mk: mk2,
+                    revenus: incomeTotalForMonth(mk2),
+                    depenses: spentTotalForMonth(mk2),
+                    courses: coursesSpentForMonth(mk2),
+                    dim: dim
                 });
             }
-            var dk = todayDateKey();
-            var upcoming = State.G.events.filter(function (e) { return e.date >= dk; }).slice(0, 10).map(function (e) {
-                return { nom: e.n, date: e.date, type: e.type };
-            });
-            var objectifs = State.G.objectifs.map(function (o) {
-                return { nom: o.n, cible: o.target, actuel: o.current, unite: o.unit };
-            });
-            return {
-                devise: "Ariary (Ar)",
-                moisActuel: getMonthKey(State.activeDate),
-                historique6mois: months,
-                configuration: {
-                    budgetJournalier: State.C.dayBudget,
-                    budgetCoursesMensuel: State.C.coursesMo,
-                    epargneMensuelle: State.C.savings,
-                    chargesFixes: State.C.fixedRows,
-                    caringMensuel: State.C.careRows,
-                    depensesHebdomadaires: State.C.weekRows
-                },
-                evenementsAVenir: upcoming,
-                objectifsPersonnels: objectifs
-            };
+            return mois;
         }
 
-        function parseAnalyseSections(text) {
-            var labels = {
-                'ETAT ACTUEL': '📍 État actuel',
-                'PREVISIONS 3 MOIS': '🔮 Prévisions 3 mois',
-                'POINTS DE VIGILANCE': '⚠️ Points de vigilance',
-                'RECOMMANDATIONS PRIORITAIRES': '✅ Recommandations prioritaires',
-                'STRATEGIE LONG TERME': '🎯 Stratégie long terme'
-            };
-            var headerPattern = /(ETAT ACTUEL|PREVISIONS 3 MOIS|POINTS DE VIGILANCE|RECOMMANDATIONS PRIORITAIRES|STRATEGIE LONG TERME)/gi;
-            var parts = text.split(headerPattern);
-            var result = [];
-            for (var i = 1; i < parts.length; i += 2) {
-                var headerKey = parts[i].toUpperCase();
-                var content = (parts[i + 1] || '').trim();
-                result.push({ label: labels[headerKey] || headerKey, content: content });
+        /* ---- Moteur d'analyse ---- */
+        function analyserBudget() {
+            ensureC(); ensureG();
+            var histo = getHistorique6Mois();
+            var revVals = histo.map(function(m){ return m.revenus; });
+            var depVals = histo.map(function(m){ return m.depenses + m.courses; });
+            var alpha = 0.5;
+
+            // Métriques calculées
+            var revMoyen = Math.round(revVals.reduce(function(a,b){ return a+b; }, 0) / (revVals.filter(function(v){ return v>0; }).length || 1));
+            var depMoyenne = Math.round(depVals.reduce(function(a,b){ return a+b; }, 0) / (depVals.filter(function(v){ return v>0; }).length || 1));
+            var tauxEpargne = revMoyen > 0 ? Math.round(((revMoyen - depMoyenne) / revMoyen) * 100) : 0;
+            var trendDep = calcLinearTrend(depVals);
+            var ratioBud = revMoyen > 0 ? Math.round((depMoyenne / revMoyen) * 100) : 0;
+
+            // Prévisions 3 mois
+            var prevDep = [], prevRev = [];
+            for (var pi = 1; pi <= 3; pi++) {
+                var allDepSoFar = depVals.concat();
+                prevDep.push(prevision(allDepSoFar, alpha));
+                prevRev.push(prevision(revVals, alpha));
             }
-            return result;
+            var prevMonth = new Date(State.activeDate.getFullYear(), State.activeDate.getMonth() + 1, 1);
+            var prevLabels = [];
+            for (var pl = 0; pl < 3; pl++) {
+                var pm = new Date(prevMonth.getFullYear(), prevMonth.getMonth() + pl, 1);
+                prevLabels.push(MSHORT[pm.getMonth()] + ' ' + pm.getFullYear());
+            }
+
+            // Risque
+            var ratioPrev = prevRev[0] > 0 ? (prevDep[0] / prevRev[0]) : 1;
+            var risque = ratioPrev < 0.7 ? 'Faible' : ratioPrev < 0.9 ? 'Moyen' : 'Élevé';
+            var risqueStatut = ratioPrev < 0.7 ? 'ok' : ratioPrev < 0.9 ? 'warn' : 'crit';
+            var tendanceLbl = trendDep > 2000 ? 'hausse' : trendDep < -2000 ? 'baisse' : 'stable';
+            var tendanceStatut = trendDep > 5000 ? 'crit' : trendDep > 2000 ? 'warn' : 'ok';
+            var epStatut = tauxEpargne >= 20 ? 'ok' : tauxEpargne >= 10 ? 'warn' : 'crit';
+            var revStatut = revMoyen >= 1000000 ? 'ok' : revMoyen >= 500000 ? 'warn' : 'crit';
+
+            // Événements à venir
+            var dk = todayDateKey();
+            var evUrgents = State.G.events.filter(function(e){ return e.date >= dk; }).slice(0, 3);
+            var objEnCours = State.G.objectifs.filter(function(o){ return o.current < o.target; });
+
+            // Générer les recommandations
+            var reco = [];
+            if (tauxEpargne < 20) reco.push("💡 Augmentez votre taux d'épargne : visez " + Math.max(State.C.savings, Math.round(revMoyen * 0.2)) + " Ar/mois (20% des revenus).");
+            if (trendDep > 2000) reco.push("⚡ Vos dépenses augmentent de " + fmtNum(Math.round(trendDep)) + " Ar/mois. Identifiez les postes variables à réduire.");
+            if (ratioBud > 90) reco.push("🔴 Ratio dépenses/revenus critique (" + ratioBud + "%). Réduire immédiatement les dépenses non-essentielles.");
+            else if (ratioBud > 75) reco.push("🟡 Ratio dépenses/revenus (" + ratioBud + "%). Attention, la marge est serrée.");
+            if (evUrgents.length) reco.push("📅 " + evUrgents.length + " événement(s) à venir — prévoyez une réserve supplémentaire.");
+            if (objEnCours.length) {
+                var totalManque = objEnCours.reduce(function(s, o){ return s + Math.max(0, o.target - o.current); }, 0);
+                reco.push("🎯 " + objEnCours.length + " objectif(s) actif(s). Il vous faut encore " + fmtNum(totalManque) + " " + (objEnCours[0].unit || 'Ar') + " pour les atteindre.");
+            }
+            if (!reco.length) reco.push("✅ Vos finances sont saines. Continuez sur cette lancée !");
+
+            // Points de vigilance
+            var vigilance = [];
+            var lastMois = histo[histo.length - 1];
+            if (lastMois.depenses > State.C.dayBudget * lastMois.dim * 1.1)
+                vigilance.push("Les dépenses quotidiennes de " + MSHORT[State.activeDate.getMonth()] + " dépassent le budget de " + Math.round(((lastMois.depenses / (State.C.dayBudget * lastMois.dim)) - 1) * 100) + "%.");
+            if (lastMois.courses > State.C.coursesMo * 1.1)
+                vigilance.push("Le budget courses a été dépassé de " + fmtNum(lastMois.courses - State.C.coursesMo) + " Ar ce mois.");
+            var dimeActuelle = dimeForMonth(getMonthKey(State.activeDate));
+            if (dimeActuelle > 0)
+                vigilance.push("Dîme du mois : " + fmtNum(dimeActuelle) + " Ar — avez-vous mis de côté cette somme ?");
+            if (!vigilance.length) vigilance.push("Aucun dépassement majeur détecté ce mois.");
+
+            // Stratégie long terme
+            var soldePrevu = prevRev[0] - prevDep[0] - State.C.savings - dimeForMonth(getMonthKey(State.activeDate));
+            var stra = "Sur les 3 prochains mois, votre épargne nette estimée est de " + fmtNum(Math.max(0, soldePrevu * 3)) + " Ar. ";
+            stra += tauxEpargne >= 20
+                ? "Votre discipline d'épargne est excellente. Envisagez d'investir l'excédent plutôt que de le laisser dormir."
+                : "Automatisez votre épargne dès réception du salaire — un virement immédiat de " + fmtNum(Math.round(revMoyen * 0.2)) + " Ar évite les dépenses impulsives.";
+
+            // Assembler le résultat
+            var result = {
+                ts: Date.now(),
+                metriques: {
+                    'Revenu moyen':      { valeur: fmtNum(revMoyen) + ' Ar', statut: revStatut, sous: 'Moyenne des 6 derniers mois' },
+                    'Taux épargne':      { valeur: tauxEpargne + ' %', statut: epStatut, sous: tauxEpargne >= 20 ? 'Objectif atteint ✓' : 'Cible : 20%' },
+                    'Tendance dépenses': { valeur: tendanceLbl, statut: tendanceStatut, sous: (trendDep >= 0 ? '+' : '') + fmtNum(Math.round(trendDep)) + ' Ar/mois' },
+                    'Risque mois prochain': { valeur: risque, statut: risqueStatut, sous: 'Ratio prévu : ' + Math.round(ratioPrev * 100) + '%' }
+                },
+                previsions: prevLabels.map(function(lbl, i){ return { lbl: lbl, dep: prevDep[i], rev: prevRev[i] }; }),
+                recommandations: reco,
+                vigilance: vigilance,
+                strategie: stra
+            };
+
+            State.G.lastAnalyse = result;
+            triggerSave();
+            nav('mois');
+            toast('🤖 Analyse terminée');
         }
 
+        /* ---- Rendu du résultat ---- */
         function renderAnalyseContent(data) {
+            var statusColor = { ok: 'var(--green)', warn: 'var(--gold)', crit: 'var(--danger)' };
             var out = [];
-            if (data.metriques) {
-                var statusColor = { ok: 'var(--green)', warn: 'var(--gold)', crit: 'var(--danger)' };
-                out.push("<div class='grid-2' style='margin-bottom:15px;'>");
-                for (var key in data.metriques) {
-                    var m = data.metriques[key];
-                    if (!m) continue;
-                    var col = statusColor[m.statut] || 'var(--text)';
-                    out.push("<div class='metric-tile'><span style='font-size:0.7em;color:var(--text-muted);'>" + escHtml(key) + "</span><h3 class='mono' style='color:" + col + ";margin:4px 0;'>" + escHtml(m.valeur) + "</h3><span style='font-size:0.68em;color:var(--text-muted);'>" + escHtml(m.sous || '') + "</span></div>");
+
+            // Métriques
+            out.push("<div class='grid-2' style='margin-bottom:15px;'>");
+            for (var key in data.metriques) {
+                var m = data.metriques[key];
+                var col = statusColor[m.statut] || 'var(--text)';
+                out.push("<div class='metric-tile'><span style='font-size:0.7em;color:var(--text-muted);'>" + escHtml(key) + "</span><h3 class='mono' style='color:" + col + ";margin:4px 0;font-size:1em;'>" + escHtml(m.valeur) + "</h3><span style='font-size:0.68em;color:var(--text-muted);'>" + escHtml(m.sous || '') + "</span></div>");
+            }
+            out.push("</div>");
+
+            // Prévisions 3 mois
+            if (data.previsions && data.previsions.length) {
+                out.push("<div class='analyse-section'><h4>🔮 Prévisions 3 mois</h4>");
+                out.push("<div class='grid-2' style='gap:6px;'>");
+                for (var pi = 0; pi < data.previsions.length; pi++) {
+                    var pv = data.previsions[pi];
+                    var solde = pv.rev - pv.dep;
+                    out.push("<div class='metric-tile'><span style='font-size:0.7em;color:var(--text-muted);'>" + escHtml(pv.lbl) + "</span><div class='mono' style='font-size:0.78em;margin-top:4px;'><span style='color:var(--green);'>↑ " + fmtNum(pv.rev) + " Ar</span><br><span style='color:var(--danger);'>↓ " + fmtNum(pv.dep) + " Ar</span><br><span style='color:" + (solde >= 0 ? 'var(--green)' : 'var(--danger)') + ";font-weight:bold;'>= " + fmtNum(solde) + " Ar</span></div></div>");
                 }
+                out.push("</div></div>");
+            }
+
+            // Points de vigilance
+            if (data.vigilance && data.vigilance.length) {
+                out.push("<div class='analyse-section'><h4>⚠️ Points de vigilance</h4>");
+                for (var vi = 0; vi < data.vigilance.length; vi++)
+                    out.push("<p style='padding:5px 0;font-size:0.85em;'>• " + escHtml(data.vigilance[vi]) + "</p>");
                 out.push("</div>");
             }
-            if (data.analyse) {
-                var sections = parseAnalyseSections(data.analyse);
-                if (sections.length) {
-                    for (var si = 0; si < sections.length; si++) {
-                        out.push("<div class='analyse-section'><h4>" + sections[si].label + "</h4><p>" + escHtml(sections[si].content) + "</p></div>");
-                    }
-                } else {
-                    out.push("<div class='analyse-section'><p>" + escHtml(data.analyse) + "</p></div>");
-                }
+
+            // Recommandations
+            if (data.recommandations && data.recommandations.length) {
+                out.push("<div class='analyse-section'><h4>✅ Recommandations prioritaires</h4>");
+                for (var ri = 0; ri < data.recommandations.length; ri++)
+                    out.push("<p style='padding:5px 0;font-size:0.85em;'>" + escHtml(data.recommandations[ri]) + "</p>");
+                out.push("</div>");
             }
+
+            // Stratégie long terme
+            if (data.strategie) {
+                out.push("<div class='analyse-section'><h4>🎯 Stratégie long terme</h4><p style='font-size:0.85em;'>" + escHtml(data.strategie) + "</p></div>");
+            }
+
             return out.join("");
-        }
-
-        function analyserBudget() {
-            var btn = document.getElementById('analyse-btn');
-            var resultDiv = document.getElementById('analyse-result');
-            if (btn) { btn.disabled = true; btn.innerHTML = "<span class='spin'>🔄</span> Analyse en cours…"; }
-            if (resultDiv) resultDiv.innerHTML = "<p style='text-align:center;color:var(--text-muted);padding:20px;'>🤖 Analyse de vos données financières en cours…</p>";
-
-            var payload = gatherBudgetData();
-            fetch('/api/analyze-budget', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data: payload })
-            }).then(function (r) {
-                return r.json().then(function (body) {
-                    if (!r.ok) {
-                        var msg = body.error || ('Erreur serveur (' + r.status + ')');
-                        if (body.detail) msg += ' — ' + body.detail;
-                        throw new Error(msg);
-                    }
-                    return body;
-                });
-            }).then(function (result) {
-                if (result.error) throw new Error(result.error + (result.detail ? ' — ' + result.detail : ''));
-                ensureG();
-                State.G.lastAnalyse = { metriques: result.metriques, analyse: result.analyse, ts: Date.now() };
-                triggerSave();
-                nav('mois');
-                toast('🤖 Analyse terminée');
-            }).catch(function (err) {
-                console.error(err);
-                if (resultDiv) resultDiv.innerHTML = "<div class='error-msg'>❌ Erreur lors de l'analyse: " + escHtml(err.message) + "</div>";
-                if (btn) { btn.disabled = false; btn.innerHTML = "🔍 Analyser mon budget"; }
-            });
         }
 
         function resetAllData() {
