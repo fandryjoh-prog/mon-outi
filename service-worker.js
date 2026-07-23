@@ -3,9 +3,9 @@ const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/apple-touch-icon.png'
+  './icon-192.png',
+  './icon-512.png',
+  './apple-touch-icon.png'
 ];
 
 // Domaines à toujours laisser passer directement au réseau (auth, données live, fonts)
