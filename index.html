@@ -459,6 +459,7 @@ label{display:block;font-size:.8rem;font-weight:600;color:var(--t2);margin-botto
     <button class="btn-primary" onclick="appLogin()" id="auth-btn" style="width:100%;margin-bottom:10px;">Se connecter</button>
     <button class="btn-outline" onclick="appGoogleLogin()" style="width:100%;margin-bottom:8px;">Continuer avec Google (Synchro Agenda)</button>
     <div class="auth-switch" onclick="toggleAuthMode()">Pas de compte ? <span>Inscrivez-vous</span></div>
+    <button class="btn-outline" id="install-app-btn" onclick="installApp()" style="width:100%;margin-top:18px;display:none;align-items:center;justify-content:center;gap:8px;">📲 Installer l'application mobile</button>
     <div id="auth-error" class="error-msg" style="display:none;margin-top:16px;"></div>
   </div>
 </div>
@@ -845,6 +846,30 @@ function triggerSave(){
 function applyTheme(){document.documentElement.setAttribute('data-theme',State.C.theme||'light');document.body.style.fontSize=(State.C.fontSize||14)+'px';}
 function tickClock(){var now=new Date();var el=document.getElementById('topbar-clock');if(el)el.textContent=p2(now.getHours())+':'+p2(now.getMinutes());}
 
+/* ============ INSTALLATION DE L'APPLICATION (PWA) ============ */
+var deferredInstallPrompt=null;
+function isAppStandalone(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}
+function updateInstallButtons(){
+  var show=!isAppStandalone();
+  var btn=document.getElementById('install-app-btn');
+  var banner=document.getElementById('install-app-banner');
+  if(btn)btn.style.display=show?'flex':'none';
+  if(banner)banner.style.display=show?'flex':'none';
+}
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredInstallPrompt=e;updateInstallButtons();});
+window.addEventListener('appinstalled',function(){deferredInstallPrompt=null;updateInstallButtons();toast('Application installée avec succès !');});
+function installApp(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(function(){deferredInstallPrompt=null;});
+  }else{
+    var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+    var msg=isIOS?"Sur iPhone / iPad : dans Safari, appuyez sur le bouton Partager (le carré avec une flèche ⬆️), puis sur « Sur l'écran d'accueil ».":"Ouvrez le menu de votre navigateur (⋮ ou ...), puis choisissez « Installer l'application » ou « Ajouter à l'écran d'accueil ».";
+    alert(msg);
+  }
+}
+updateInstallButtons();
+
 /* ============ NAVIGATION & TRANSITIONS ============ */
 var _scrollPositions={};
 
@@ -955,6 +980,7 @@ function renderJour(container){
 
   // SMART GREETING
   h.push("<div class='smart-greeting'>"+getSmartGreeting()+"</div>");
+  h.push("<div id='install-app-banner' style='display:none;align-items:center;justify-content:space-between;gap:12px;background:var(--primary-bg);border:1px solid var(--primary);border-radius:12px;padding:12px 16px;margin-bottom:16px;'><span style='font-size:.85rem;color:var(--primary-t);'>📲 Installez Dealife sur votre téléphone pour un accès rapide, même hors ligne.</span><button class='btn-primary btn-sm' onclick='installApp()' style='flex-shrink:0;'>Installer</button></div>");
 
   // PROACTIVE ALERTS
   h.push(renderAlertBanners(mk,todayInt));
